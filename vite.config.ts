@@ -9,6 +9,7 @@ import vike from "vike/plugin";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const root = resolve(__dirname, ".");
@@ -32,6 +33,7 @@ export default defineConfig({
     }),
     vike({}),
     vikeSolid(),
+    tailwindcss(),
   ],
   server: {
     port: 3000,

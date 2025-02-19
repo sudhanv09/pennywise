@@ -1,6 +1,7 @@
 import getTitle from "@/utils/get-title";
 import { createSignal, type FlowProps } from "solid-js";
 import { useMetadata } from "vike-metadata-solid";
+import "./app.css"
 
 useMetadata.setGlobalDefaults({
   title: getTitle("Home"),
