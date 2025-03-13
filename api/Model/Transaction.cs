@@ -6,7 +6,7 @@ public class Transaction
     public string Title { get; set; }
     public string? Description { get; set; }
     public int Amount { get; set; }
-    public DateTime Created { get; set; }
+    public DateTime Created { get; set; } = DateTime.Now;
     public TransactionType TransactionType { get; set; }
     public TransactionCategory Category { get; set; }
     
