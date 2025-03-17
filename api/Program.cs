@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using api.Data;
 using api.Model;
+using api.Model.DTO;
 using api.Service;
 using api.Utils;
 using Microsoft.AspNetCore.Http.Json;
@@ -41,12 +42,19 @@ var app = builder.Build();
 // Controllers
 app.MapGet("/", () => "Hello World!");
 
-app.MapPost("/new", async (UserService service, string username, string? email, string? currency) => await service.AddUser(username, email, currency));
+app.MapPost("/new", async (UserService service, string username, string? email, string? currency) =>
+{
+    var created = await service.AddUser(username, email, currency);
+    if (created.IsFailed) return Results.BadRequest(created.Reasons);
+
+    return Results.Created();
+});
+
 app.MapGet("/users", async (UserService service) => await service.GetAllUsers());
 app.MapGet("/user/{id}", async (UserService service, string id) => await service.GetUserById(id));
 
 app.MapGet("/user/wallet", async (WalletService service, string id) => await service.GetUserWallet(id));
-app.MapPost("/user/new", async (WalletService service, Transaction tx) =>
+app.MapPost("/user/new", async (WalletService service, TxDto tx) =>
 {
     await service.AddTransaction(tx);
     return Results.Created();

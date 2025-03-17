@@ -1,5 +1,6 @@
 using api.Data;
 using api.Model;
+using FluentResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Service;
@@ -18,8 +19,10 @@ public class UserService
         return await _context.Users.ToListAsync();
     }
 
-    public async Task AddUser(string name, string? email, string? currency)
+    public async Task<Result> AddUser(string name, string? email, string? currency)
     {
+        var exists = await _context.Users.AnyAsync(u => u.Name == name && u.Email == email);
+        if (exists) return Result.Fail("User already exists");
         var newUser = new User()
         {
             Id = Ulid.NewUlid(),
@@ -30,6 +33,8 @@ public class UserService
         
         await _context.Users.AddAsync(newUser);
         await _context.SaveChangesAsync();
+        
+        return Result.Ok();
     }
 
     public async Task<User> GetUserById(string id)
