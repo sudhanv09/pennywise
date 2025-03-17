@@ -27,6 +27,7 @@ builder.Services.AddTransient<ISerializerDataContractResolver>(sp =>
     return new JsonSerializerDataContractResolver(opts);
 });
 
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<WalletService>();
 builder.Services.AddDbContext<AppDbContext>(services =>
     services.UseSqlite(builder.Configuration["ConnectionStrings:SqliteDefault"])
@@ -40,8 +41,12 @@ var app = builder.Build();
 // Controllers
 app.MapGet("/", () => "Hello World!");
 
-app.MapGet("/wallet", async (WalletService service, string id) => await service.GetUserWallet(id));
-app.MapPost("/wallet/new", async (WalletService service, Transaction tx) =>
+app.MapPost("/new", async (UserService service, string username, string? email, string? currency) => await service.AddUser(username, email, currency));
+app.MapGet("/users", async (UserService service) => await service.GetAllUsers());
+app.MapGet("/user/{id}", async (UserService service, string id) => await service.GetUserById(id));
+
+app.MapGet("/user/wallet", async (WalletService service, string id) => await service.GetUserWallet(id));
+app.MapPost("/user/new", async (WalletService service, Transaction tx) =>
 {
     await service.AddTransaction(tx);
     return Results.Created();
@@ -56,6 +61,7 @@ if (app.Environment.IsDevelopment())
 app.Run();
 
 [JsonSerializable(typeof(User))]
+[JsonSerializable(typeof(List<User>))]
 [JsonSerializable(typeof(Transaction))]
 [JsonSerializable(typeof(TransactionType))]
 [JsonSerializable(typeof(TransactionCategory))]
