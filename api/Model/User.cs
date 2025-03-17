@@ -7,6 +7,6 @@ public class User
     public string? Email { get; set; }
     public Account[]? Accounts { get; set; }
     public Transaction[]? Transactions { get; set; }
-    public string Currency { get; set; }
-    
+    public string Currency { get; set; } = "USD";
+
 }

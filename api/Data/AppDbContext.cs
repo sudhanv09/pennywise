@@ -19,5 +19,9 @@ public class AppDbContext: DbContext
         modelBuilder.Entity<User>()
             .Property(u => u.Id)
             .HasConversion<UlidConverter>();
+
+        modelBuilder.Entity<User>()
+            .Property(c => c.Currency)
+            .HasDefaultValue("USD");
     }
 }
