@@ -1,26 +1,39 @@
 using api.Data;
 using api.Model;
+using api.Model.DTO;
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Service;
 
-public class WalletService
+public class WalletService(AppDbContext dbContext)
 {
-    private AppDbContext _context;
-    public WalletService(AppDbContext dbContext)
-    {
-        _context = dbContext;
-    }
-
     public async Task<User> GetUserWallet(string userId)
     {
-        return await _context.Users.FindAsync(userId);
+        return await dbContext.Users.FindAsync(userId);
     }
 
-    public async Task AddTransaction(Transaction transaction)
+    public async Task AddTransaction(TxDto transaction)
     {
-        _context.Transactions.Add(transaction);
-        await _context.SaveChangesAsync();
+        var newTx = new Transaction()
+        {
+            Id = Ulid.NewUlid().ToString(),
+            Title = transaction.Title,
+            Description = transaction.Description,
+            Amount = transaction.Amount,
+            Created = transaction.CreatedAt,
+            TransactionType = transaction.Type,
+            Category = transaction.Category,
+        };
+
+        dbContext.Transactions.Add(newTx);
+        await dbContext.SaveChangesAsync();
     }
-    
+
+    public async Task<List<Transaction>> GetMonthlyTransactions(DateTime startDate,
+        DateTime endDate)
+    {
+        return await dbContext.Transactions
+            .Where(x => x.Created >= startDate && x.Created <= endDate)
+            .ToListAsync();
+    }
 }
