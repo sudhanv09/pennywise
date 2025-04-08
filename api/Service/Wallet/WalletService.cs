@@ -16,7 +16,6 @@ public class WalletService(AppDbContext dbContext)
     {
         var newTx = new Transaction()
         {
-            Id = Ulid.NewUlid().ToString(),
             Title = transaction.Title,
             Description = transaction.Description,
             Amount = transaction.Amount,

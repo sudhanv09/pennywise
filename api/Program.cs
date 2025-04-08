@@ -4,6 +4,8 @@ using api.Data;
 using api.Model;
 using api.Model.DTO;
 using api.Service;
+using api.Service.Account;
+using api.Service.Wallet;
 using api.Utils;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Identity;
@@ -29,8 +31,6 @@ builder.Services.AddTransient<ISerializerDataContractResolver>(sp =>
     return new JsonSerializerDataContractResolver(opts);
 });
 
-builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<WalletService>();
 builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
 builder.Services.AddAuthorizationBuilder();
 builder.Services.AddDbContext<AppDbContext>(services =>
@@ -46,26 +46,9 @@ builder.Services.AddSwaggerGen(c => { c.SchemaFilter<EnumFilter>(); });
 
 var app = builder.Build();
 
-// Controllers
-app.MapGet("/", () => "Hello World!");
-
-app.MapPost("/new", async (UserService service, string username, string? email, string? currency) =>
-{
-    var created = await service.AddUser(username, email, currency);
-    if (created.IsFailed) return Results.BadRequest(created.Reasons);
-
-    return Results.Created();
-});
-
-app.MapGet("/users", async (UserService service) => await service.GetAllUsers());
-app.MapGet("/user/{id}", async (UserService service, string id) => await service.GetUserById(id));
-
-app.MapGet("/user/wallet", async (WalletService service, string id) => await service.GetUserWallet(id));
-app.MapPost("/user/new", async (WalletService service, TxDto tx) =>
-{
-    await service.AddTransaction(tx);
-    return Results.Created();
-});
+// Endpoints
+app.UserAccountEndpoint();
+app.UserWalletEndpoint();
 
 if (app.Environment.IsDevelopment())
 {
