@@ -6,6 +6,7 @@ using api.Model.DTO;
 using api.Service;
 using api.Utils;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Scalar.AspNetCore;
@@ -30,9 +31,15 @@ builder.Services.AddTransient<ISerializerDataContractResolver>(sp =>
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<WalletService>();
+builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme).AddIdentityCookies();
+builder.Services.AddAuthorizationBuilder();
 builder.Services.AddDbContext<AppDbContext>(services =>
     services.UseSqlite(builder.Configuration["ConnectionStrings:SqliteDefault"])
 );
+builder.Services
+    .AddIdentityCore<User>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddApiEndpoints();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => { c.SchemaFilter<EnumFilter>(); });
