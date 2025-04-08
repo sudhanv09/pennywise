@@ -41,6 +41,7 @@ builder.Services
     .AddEntityFrameworkStores<AppDbContext>()
     .AddApiEndpoints();
 
+builder.Services.AddScoped<SignInManager<User>>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => { c.SchemaFilter<EnumFilter>(); });
 
