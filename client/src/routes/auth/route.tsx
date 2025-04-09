@@ -7,8 +7,8 @@ export const Route = createFileRoute("/auth")({
 
 function RouteComponent() {
   return (
-    <>
+    <div className="min-h-screen">
       <Outlet />
-    </>
+    </div>
   );
 }
