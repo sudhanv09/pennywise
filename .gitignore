@@ -1,6 +1,9 @@
 dist
 .output
 .vinxi
+generated/prisma
+
+penny.db*
 
 # Environment
 .env
