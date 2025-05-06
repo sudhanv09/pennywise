@@ -8,28 +8,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String    @id @default(ulid())
-  email         String    @unique
-  password      String
-  name          String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  image         String?
-  sessions      Session[]
-  verifications Verification[]
-  accounts Account[]
-  transactions Transaction[]
-
-  @@map("user")
-}
-
 model Session {
   id           String   @id @default(ulid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("session")
 }
@@ -42,8 +26,8 @@ model Verification {
   createdAt  DateTime? @default(now())
   updatedAt  DateTime? @updatedAt
 
-  userId    String    
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("verification")
 }
@@ -64,75 +48,109 @@ enum TransactionCategory {
   Extra
 }
 
+model User {
+  id        String   @id @default(ulid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  image     String?
+
+  // auth
+  sessions      Session[]
+  verifications Verification[]
+
+  // domain
+  accounts     Account[]
+  transactions Transaction[]
+  goals        Goal[]
+  loans        Loan[]
+
+  @@map("user")
+}
+
 model Transaction {
-  id String @id @default(ulid())
-  title String?
-  amount Decimal
-  description String?
-  category Category
-  transactionCategory TransactionType?
+  id                  String               @id @default(ulid())
+  title               String?
+  amount              Decimal
+  description         String?
+  category            Category
+  transactionCategory TransactionCategory?
 
-  createdAt  DateTime? @default(now())
-  updatedAt    DateTime          @updatedAt
+  createdAt DateTime? @default(now())
+  updatedAt DateTime  @updatedAt
 
-  userId       String            
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accountId    String            
-  account      Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  transferAccountId String?       // Destination account for transfers
-  transferAccount   Account?      @relation(fields: [transferAccountId], references: [id], onDelete: Cascade, name: "TransferTo")
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accountId String
+  account   Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  transferAccountId String? // Destination account for transfers
+  transferAccount   Account? @relation(fields: [transferAccountId], references: [id], onDelete: Cascade, name: "TransferTo")
+
+  goalId String? // Optional link to goal
+  goal   Goal?   @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  loanId String? // Optional link to loan
+  loan   Loan?   @relation(fields: [loanId], references: [id], onDelete: SetNull)
 
   @@map("transactions")
 }
 
 model Account {
-  id String @id @default(ulid())
-  name String
-  currency String @default("USD")
-  balance Decimal @default(0.0)
+  id       String  @id @default(ulid())
+  name     String
+  currency String  @default("USD")
+  balance  Decimal @default(0.0)
 
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions Transaction[]
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  transactions         Transaction[]
+  transferTransactions Transaction[] @relation("TransferTo")
+
+  goals Goal[]
+  loans Loan[]
 
   @@map("accounts")
 }
 
 model Goal {
-  id          String    @id @default(ulid())
-  name        String    
-  targetAmount Decimal  
-  currentAmount Decimal @default(0.00) // Current savings
-  deadline    DateTime?
+  id            String    @id @default(ulid())
+  name          String
+  targetAmount  Decimal
+  currentAmount Decimal   @default(0.00) // Current savings
+  deadline      DateTime?
 
-  userId      String    
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accountId   String?   
-  account     Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId    String?
+  account      Account?      @relation(fields: [accountId], references: [id], onDelete: SetNull)
   transactions Transaction[]
 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("goal")
 }
 
 model Loan {
-  id             String    @id @default(ulid())
-  name           String    
-  totalAmount    Decimal   
-  remainingAmount Decimal  
-  interestRate   Float?  
-  monthlyPayment Decimal?
+  id              String   @id @default(ulid())
+  name            String
+  totalAmount     Decimal
+  remainingAmount Decimal
+  interestRate    Float?
+  monthlyPayment  Decimal?
 
-  userId         String    
-  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accountId      String?  
-  account        Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
-  transactions   Transaction[]
-   
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  userId       String
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId    String?
+  account      Account?      @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("loan")
 }
