@@ -1,0 +1,50 @@
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 300px;
+    max-width: 450px;
+    gap: 1rem;
+    padding: 1.25rem;
+    background-color: var(--bg-card, #fff);
+    color: var(--card-foreground, #000);
+    border: 0.25rem solid var(--card-border, #e5e7eb);
+    border-radius: 0.75rem;
+    box-shadow: var(--card-shadow, 0 1px 2px rgba(0, 0, 0, 0.05));
+}
+
+.card__header {
+    & h1 {
+        
+    }
+
+    & p {
+        
+    }
+
+}
+
+.card__body {
+    width: 100%; 
+  }
+  
+
+.card__field {
+    display: grid;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+
+.card__footer {
+
+}
