@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
     "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
@@ -13,7 +15,7 @@
     "types": ["vinxi/types/client"],
     "isolatedModules": true,
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./app/*"]
     }
   }
 }

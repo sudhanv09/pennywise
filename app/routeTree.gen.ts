@@ -13,7 +13,6 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
-import { Route as ApiAuthauthImport } from './routes/api/auth/*auth'
 
 // Create/Update Routes
 
@@ -26,12 +25,6 @@ const AboutRoute = AboutImport.update({
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ApiAuthauthRoute = ApiAuthauthImport.update({
-  id: '/api/auth/*auth',
-  path: '/api/auth/*auth',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -53,13 +46,6 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
-    '/api/auth/*auth': {
-      id: '/api/auth/*auth'
-      path: '/api/auth/*auth'
-      fullPath: '/api/auth/*auth'
-      preLoaderRoute: typeof ApiAuthauthImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
@@ -68,41 +54,36 @@ declare module '@tanstack/solid-router' {
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/api/auth/*auth': typeof ApiAuthauthRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/api/auth/*auth': typeof ApiAuthauthRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/api/auth/*auth': typeof ApiAuthauthRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/api/auth/*auth'
+  fullPaths: '/' | '/about'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/api/auth/*auth'
-  id: '__root__' | '/' | '/about' | '/api/auth/*auth'
+  to: '/' | '/about'
+  id: '__root__' | '/' | '/about'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  ApiAuthauthRoute: typeof ApiAuthauthRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  ApiAuthauthRoute: ApiAuthauthRoute,
 }
 
 export const routeTree = rootRoute
@@ -116,8 +97,7 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about",
-        "/api/auth/*auth"
+        "/about"
       ]
     },
     "/": {
@@ -125,9 +105,6 @@ export const routeTree = rootRoute
     },
     "/about": {
       "filePath": "about.tsx"
-    },
-    "/api/auth/*auth": {
-      "filePath": "api/auth/*auth.ts"
     }
   }
 }
