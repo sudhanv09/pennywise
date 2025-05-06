@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -17,50 +14,24 @@ model User {
   password      String
   name          String?
   createdAt     DateTime  @default(now())
-  sessions      Session[]
-  emailVerified Boolean
+  updatedAt     DateTime  @updatedAt
   image         String?
-  updatedAt     DateTime
-  accounts      Account[]
+  sessions      Session[]
+  verifications Verification[]
+  accounts Account[]
+  transactions Transaction[]
 
   @@map("user")
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(ulid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  token     String
-  createdAt DateTime
-  updatedAt DateTime
-  ipAddress String?
-  userAgent String?
 
-  @@unique([token])
   @@map("session")
-}
-
-model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
-
-  @@map("account")
 }
 
 model Verification {
@@ -68,8 +39,100 @@ model Verification {
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  userId    String    
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("verification")
+}
+
+enum Category {
+  Income
+  Expense
+  Transfer
+}
+
+enum TransactionCategory {
+  Shopping
+  Bills
+  Food
+  Groceries
+  Transit
+  Income
+  Extra
+}
+
+model Transaction {
+  id String @id @default(ulid())
+  title String?
+  amount Decimal
+  description String?
+  category Category
+  transactionCategory TransactionType?
+
+  createdAt  DateTime? @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  userId       String            
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId    String            
+  account      Account           @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  transferAccountId String?       // Destination account for transfers
+  transferAccount   Account?      @relation(fields: [transferAccountId], references: [id], onDelete: Cascade, name: "TransferTo")
+
+  @@map("transactions")
+}
+
+model Account {
+  id String @id @default(ulid())
+  name String
+  currency String @default("USD")
+  balance Decimal @default(0.0)
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("accounts")
+}
+
+model Goal {
+  id          String    @id @default(ulid())
+  name        String    
+  targetAmount Decimal  
+  currentAmount Decimal @default(0.00) // Current savings
+  deadline    DateTime?
+
+  userId      String    
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId   String?   
+  account     Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  transactions Transaction[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("goal")
+}
+
+model Loan {
+  id             String    @id @default(ulid())
+  name           String    
+  totalAmount    Decimal   
+  remainingAmount Decimal  
+  interestRate   Float?  
+  monthlyPayment Decimal?
+
+  userId         String    
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId      String?  
+  account        Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  transactions   Transaction[]
+   
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("loan")
 }
