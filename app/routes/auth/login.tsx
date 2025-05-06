@@ -13,22 +13,18 @@ function RouteComponent() {
           <h1>Login</h1>
           <p>Enter your email to login to your account</p>
         </div>
-        <div class={styles.card__body}>
-          <form action="">
-            <div class={styles.card__field}>
-              <label for="email">Email</label>
-              <input id="email" type="email" placeholder="john.doe@email.com" />
-            </div>
-            <div class={styles.card__field}>
-              <div>
-                <label for="password">Password</label>
-                <a href="#">Forgot Password?</a>
-              </div>
-              <input id="password" type="password" />
-            </div>
-            <button>Submit</button>
-          </form>
-        </div>
+        <form action="" class={styles.card__body}>
+          <div class={styles.input_group}>
+            <input id="email" type="email" placeholder="john.doe@email.com" required/>
+            <label for="email">Email</label>
+          </div>
+          <div class={styles.input_group}>
+            <input id="password" type="password" required/>
+            <label for="password">Password</label>
+          </div>
+          <a href="#">Forgot Password?</a>
+          <button>Submit</button>
+        </form>
         <div class={styles.card__footer}>
           <p>
             Don't have an account? <a href="/auth/sign-up">Sign up</a>

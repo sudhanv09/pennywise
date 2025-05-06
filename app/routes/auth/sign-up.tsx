@@ -13,27 +13,30 @@ function RouteComponent() {
           <h1>Register</h1>
           <p>Register a new account</p>
         </div>
-        <div class={styles.card__body}>
-          <form action="">
-            <div class={styles.card__field}>
-              <label for="name">Username</label>
-              <input id="name" type="text" placeholder="johndoe" />
-            </div>
-            <div class={styles.card__field}>
-              <label for="email">Email</label>
-              <input id="email" type="email" placeholder="john.doe@email.com" />
-            </div>
-            <div class={styles.card__field}>
-              <label for="password">Password</label>
-              <input id="password" type="password" />
-            </div>
-            <div class={styles.card__field}>
-              <label for="confirm">Confirm Password</label>
-              <input id="confirm" type="password" />
-            </div>
-            <button>Submit</button>
-          </form>
-        </div>
+        <form action="" class={styles.card__body}>
+          <div class={styles.input_group}>
+            <input id="name" type="text" placeholder="johndoe" required />
+            <label for="name">Username</label>
+          </div>
+          <div class={styles.input_group}>
+            <input
+              id="email"
+              type="email"
+              placeholder="john.doe@email.com"
+              required
+            />
+            <label for="email">Email</label>
+          </div>
+          <div class={styles.input_group}>
+            <input id="password" type="password" required />
+            <label for="password">Password</label>
+          </div>
+          <div class={styles.input_group}>
+            <input id="confirm" type="password" required />
+            <label for="confirm">Confirm Password</label>
+          </div>
+          <button>Submit</button>
+        </form>
         <div class={styles.card__footer}>
           <p>
             Already have an account? <a href="/auth/login">Login</a>
