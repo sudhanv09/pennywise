@@ -1,0 +1,23 @@
+.root {
+  display: flex;
+  min-height: 100dvh;
+}
+
+.sidebarOpen .app {
+  padding-left: 16rem;
+  transition: padding-left 0.3s ease;
+}
+
+.sidebarClosed .app {
+  padding-left: 0;
+  transition: padding-left 0.3s ease;
+}
+
+.app {
+  flex: 1;
+  height: 100dvh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
