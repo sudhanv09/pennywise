@@ -1,0 +1,14 @@
+
+.dashboard {
+    display: grid;
+    grid: repeat(3) / auto-flow;
+    height: 100%;
+}
+
+.dashboard__info {
+
+}
+
+.dashboard__table {
+
+}
