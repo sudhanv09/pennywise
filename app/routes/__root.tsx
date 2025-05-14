@@ -1,11 +1,5 @@
 import { Outlet, createRootRoute } from "@tanstack/solid-router";
-import {
-  Sidebar,
-  SidebarProvider,
-  SidebarTrigger,
-  useSidebar,
-} from "~/components/sidebar";
-import styles from "./root.module.css";
+import { SidebarProvider } from "~/components/sidebar";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -28,25 +22,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <SidebarProvider>
-      <AppLayout />
+      <Outlet />
     </SidebarProvider>
-  );
-}
-
-function AppLayout() {
-  const { isOpen } = useSidebar();
-
-  return (
-    <div
-      class={`${styles.root} ${
-        isOpen() ? styles.sidebarOpen : styles.sidebarClosed
-      }`}
-    >
-      <Sidebar />
-      <div class={styles.app}>
-        <SidebarTrigger />
-        <Outlet />
-      </div>
-    </div>
   );
 }

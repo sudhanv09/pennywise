@@ -1,6 +1,6 @@
 import styles from "./sidebar.module.css";
 import { Link, useRouter } from "@tanstack/solid-router";
-import { createContext, createSignal, useContext } from "solid-js";
+import { createContext, createSignal, JSX, useContext } from "solid-js";
 
 type SidebarContextType = {
   isOpen: () => boolean;
@@ -11,7 +11,7 @@ type SidebarContextType = {
 
 const SidebarContext = createContext<SidebarContextType>();
 
-export function SidebarProvider(props) {
+export function SidebarProvider(props: { children?: JSX.Element }) {
   const [isOpen, setIsOpen] = createSignal(true);
 
   const context: SidebarContextType = {
@@ -35,7 +35,7 @@ export function useSidebar() {
 }
 
 export function SidebarTrigger() {
-  const { isOpen, toggle } = useSidebar();
+  const { toggle } = useSidebar();
 
   return (
     <button onClick={toggle} class={styles.sidebar__trigger}>
