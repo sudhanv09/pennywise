@@ -1,9 +1,8 @@
 import {
   Outlet,
   createRootRoute,
-  HeadContent,
-  Scripts,
 } from '@tanstack/solid-router'
+import { Sidebar } from '~/components/sidebar'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -24,5 +23,9 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
-  return <Outlet />
+  return (
+    <div class='app'>
+      <Sidebar />
+      <Outlet />
+    </div>)
 }
