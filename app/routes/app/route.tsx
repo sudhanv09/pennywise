@@ -1,7 +1,8 @@
 import { createFileRoute, Outlet } from "@tanstack/solid-router";
 import styles from "./layout.module.css";
 
-import { useSidebar, Sidebar, SidebarTrigger } from "~/components/sidebar";
+import { useSidebar, Sidebar } from "~/components/sidebar";
+import { Navbar } from "~/components/nav";
 
 export const Route = createFileRoute("/app")({
   component: RouteComponent,
@@ -17,7 +18,7 @@ function RouteComponent() {
     >
       <Sidebar />
       <div class={styles.app}>
-        <SidebarTrigger />
+        <Navbar />
         <Outlet />
       </div>
     </div>

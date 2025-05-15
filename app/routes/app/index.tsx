@@ -8,7 +8,6 @@ export const Route = createFileRoute("/app/")({
 function RouteComponent() {
   return (
     <div class={styles.dashboard}>
-      <nav>Nav bar add button settings</nav>
       <section class={styles.dashboard__info}>Cards</section>
       <section class={styles.dashboard__table}>Table</section>
     </div>
