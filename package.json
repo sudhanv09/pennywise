@@ -9,6 +9,7 @@
     "version": "vinxi version"
   },
   "dependencies": {
+    "@corvu/dialog": "^0.2.4",
     "@prisma/client": "^6.7.0",
     "@tanstack/solid-router": "^1.119.0",
     "@tanstack/solid-start": "^1.1.3",

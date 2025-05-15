@@ -161,6 +161,6 @@
 }
 
 a {
-  color: #1778f2;
+  color: var(--link);
   align-self: flex-end;
 }
