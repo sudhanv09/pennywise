@@ -1,5 +1,5 @@
 {
-  "name": "example-with-tailwindcss",
+  "name": "pennywise",
   "type": "module",
   "scripts": {
     "dev": "vinxi dev",
@@ -18,10 +18,8 @@
     "vinxi": "^0.5.7"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.0.7",
     "@types/node": "^24.2.0",
-    "drizzle-kit": "^0.31.4",
-    "tailwindcss": "^4.0.7"
+    "drizzle-kit": "^0.31.4"
   },
   "engines": {
     "node": ">=22"
