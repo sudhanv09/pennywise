@@ -1,0 +1,88 @@
+.card {
+  background-color: white;
+  border: 1px solid hsl(210, 40%, 90%);
+  border-radius: 8px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid hsl(210, 40%, 95%);
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: hsl(210, 40%, 20%);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.content {
+  padding: 20px 24px;
+}
+
+/* When there's no title, remove top padding from content */
+.card:not(:has(.header)) .content {
+  padding-top: 24px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background-color: hsl(210, 40%, 10%);
+    border-color: hsl(210, 40%, 20%);
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+
+  .header {
+    border-bottom-color: hsl(210, 40%, 20%);
+  }
+
+  .title {
+    color: hsl(210, 40%, 85%);
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .header {
+    padding: 16px 20px 12px;
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .content {
+    padding: 16px 20px;
+  }
+
+  .card:not(:has(.header)) .content {
+    padding-top: 20px;
+  }
+}
+
+/* Tablet responsive */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .header {
+    padding: 18px 22px 14px;
+  }
+
+  .content {
+    padding: 18px 22px;
+  }
+
+  .card:not(:has(.header)) .content {
+    padding-top: 22px;
+  }
+}
