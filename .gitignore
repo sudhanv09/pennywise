@@ -8,3 +8,4 @@ dist-ssr
 .tanstack
 
 /src/generated/prisma
+penny.db
