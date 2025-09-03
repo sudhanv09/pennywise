@@ -1,0 +1,134 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String         @id @default(ulid())
+  name              String
+  email             String         @unique
+  preferredCurrency String         @default("USD")
+
+  accounts      Account[]
+  transactions  Transaction[]
+  categories    Category[]
+  goals         Goal[]
+  loans         Loan[]
+  subscriptions Subscription[]
+  budgets       Budget[]
+}
+
+model Account {
+  id           Int           @id @default(autoincrement())
+  name         String
+  currency     String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  amount      Int
+  createdDate DateTime  @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String
+
+  account   Account  @relation(fields: [accountId], references: [id])
+  accountId Int
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+}
+
+model Category {
+  id           Int           @id @default(autoincrement())
+  name         String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  transactions Transaction[]
+}
+
+model Goal {
+  id            Int      @id @default(autoincrement())
+  title         String
+  targetAmount  Int
+  currentAmount Int      @default(0)
+  deadline      DateTime?
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Loan {
+  id           Int      @id @default(autoincrement())
+  amount       Int
+  interestRate Float?
+  startDate    DateTime @default(now())
+  endDate      DateTime?
+
+  type         LoanType
+  repayment    RepaymentType
+  status       LoanStatus @default(ACTIVE)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+enum LoanType {
+  BORROWED
+  LENT
+}
+
+enum RepaymentType {
+  ONE_TIME
+  INSTALLMENTS
+}
+
+enum LoanStatus {
+  ACTIVE
+  PAID
+  DEFAULTED
+}
+
+model Subscription {
+  id           Int      @id @default(autoincrement())
+  name         String
+  amount       Int
+  startDate    DateTime @default(now())
+  renewalCycle RenewalCycle
+  nextPayment  DateTime
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+enum RenewalCycle {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model Budget {
+  id        Int      @id @default(autoincrement())
+  name      String
+  amount    Int
+  startDate DateTime
+  endDate   DateTime
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
