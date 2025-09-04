@@ -69,7 +69,7 @@ const TransactionSchema = v.object({
   description: v.optional(v.string()),
 });
 
-type TransactionData = v.InferOutput<typeof TransactionSchema>;
+export type TransactionData = v.InferOutput<typeof TransactionSchema>;
 
 export interface TransactionFormProps {
   onSubmit: (transaction: TransactionData) => void;

@@ -23,7 +23,12 @@ export default function Sidebar(props: SidebarProps): JSX.Element {
   const location = useLocation({select: (location) => location.pathname})
 
   const isActiveRoute = (path: string): boolean => {
-    return location() === path
+    const currentPath = location()
+    // Handle root path redirect to dashboard
+    if (currentPath === '/' && path === '/dashboard') {
+      return true
+    }
+    return currentPath === path
   }
 
   return (

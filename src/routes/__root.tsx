@@ -1,9 +1,8 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/solid-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/solid-query'
+import Layout from '../components/layout/Layout'
 
-const queryCLient = new QueryClient();
-
-import Header from '../components/Header'
+const queryClient = new QueryClient();
 
 export const Route = createRootRouteWithContext()({
   component: RootComponent,
@@ -11,12 +10,10 @@ export const Route = createRootRouteWithContext()({
 
 function RootComponent() {
   return (
-    <>
-      <QueryClientProvider client={queryCLient}>
-        <Header />
-
+    <QueryClientProvider client={queryClient}>
+      <Layout>
         <Outlet />
-      </QueryClientProvider>
-    </>
+      </Layout>
+    </QueryClientProvider>
   )
 }
