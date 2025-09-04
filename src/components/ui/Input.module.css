@@ -1,0 +1,110 @@
+/* Field Container */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+/* Label Styles */
+.label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+  line-height: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.required {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* Input Styles */
+.input {
+  display: flex;
+  height: 2.5rem;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background-color: var(--background);
+  padding: 0 var(--spacing-3);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--foreground);
+  transition: all var(--transition);
+}
+
+.input::placeholder {
+  color: var(--muted-foreground);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: var(--muted);
+}
+
+/* Error State */
+.input--error {
+  border-color: var(--danger);
+}
+
+.input--error:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+/* Error Message */
+.error {
+  font-size: 0.75rem;
+  color: var(--danger);
+  line-height: 1rem;
+  margin-top: var(--spacing-1);
+}
+
+/* Number input specific styles */
+.input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Date input specific styles */
+.input[type="date"] {
+  position: relative;
+}
+
+.input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--transition);
+}
+
+.input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .input {
+    height: 2.75rem; /* 44px minimum for touch */
+    font-size: 1rem; /* Prevent zoom on iOS */
+  }
+  
+  .label {
+    font-size: 1rem;
+  }
+}

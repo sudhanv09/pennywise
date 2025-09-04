@@ -1,11 +1,11 @@
 node_modules
-.DS_Store
-dist
-dist-ssr
-*.local
 .env
 .nitro
 .tanstack
+.output
+.kiro
+.vscode
+demo.html
 
 /src/generated/prisma
 penny.db

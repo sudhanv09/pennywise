@@ -1,0 +1,55 @@
+/* Base Card Component Styles */
+.card {
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: var(--spacing-6);
+  transition: box-shadow var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card--stat {
+  padding: var(--spacing-4);
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.card--stat:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-1px);
+  transition: all var(--transition);
+}
+
+.card--chart {
+  padding: var(--spacing-6);
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .card {
+    padding: var(--spacing-4);
+    border-radius: var(--radius);
+  }
+  
+  .card--chart {
+    min-height: 250px;
+    padding: var(--spacing-4);
+  }
+  
+  .card--stat {
+    padding: var(--spacing-3);
+  }
+}
+
+@media (min-width: 768px) {
+  .card--stat {
+    padding: var(--spacing-6);
+  }
+}

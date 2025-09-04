@@ -1,0 +1,84 @@
+/* Base Badge Styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  padding: var(--spacing-1) var(--spacing-3);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1rem;
+  white-space: nowrap;
+  transition: all var(--transition);
+  border: 1px solid transparent;
+}
+
+/* Default Badge */
+.badge--default {
+  background-color: var(--muted);
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
+/* Category-specific Badge Variants */
+.badge--shopping {
+  background-color: rgba(99, 102, 241, 0.1);
+  color: var(--primary);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+.badge--bills {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+.badge--groceries {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.badge--entertainment {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.badge--transport {
+  background-color: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.badge--other {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: var(--gray-600);
+  border-color: rgba(107, 114, 128, 0.2);
+}
+
+/* Hover effects for interactive badges */
+.badge:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+/* Mobile adjustments */
+@media (max-width: 767px) {
+  .badge {
+    font-size: 0.875rem;
+    padding: var(--spacing-2) var(--spacing-3);
+  }
+}
+
+/* Size variants (optional for future use) */
+.badge--sm {
+  padding: var(--spacing-1) var(--spacing-2);
+  font-size: 0.625rem;
+  line-height: 0.75rem;
+}
+
+.badge--lg {
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}

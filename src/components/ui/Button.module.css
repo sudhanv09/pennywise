@@ -1,0 +1,112 @@
+/* Base Button Component Styles */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-weight: 500;
+  transition: all var(--transition);
+  cursor: pointer;
+  border: 1px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Size Variants */
+.button--sm {
+  height: 2rem;
+  padding: 0 var(--spacing-3);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.button--md {
+  height: 2.5rem;
+  padding: 0 var(--spacing-4);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.button--lg {
+  height: 3rem;
+  padding: 0 var(--spacing-6);
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+/* Color Variants */
+.button--primary {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.button--primary:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.button--primary:active:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(1px);
+}
+
+.button--secondary {
+  background-color: var(--muted);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.button--secondary:hover:not(:disabled) {
+  background-color: var(--gray-200);
+  border-color: var(--gray-500);
+}
+
+.button--secondary:active:not(:disabled) {
+  background-color: var(--gray-200);
+  transform: translateY(1px);
+}
+
+.button--outline {
+  background-color: transparent;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.button--outline:hover:not(:disabled) {
+  background-color: var(--primary);
+  color: white;
+}
+
+.button--outline:active:not(:disabled) {
+  background-color: var(--primary-hover);
+  transform: translateY(1px);
+}
+
+/* Mobile touch targets */
+@media (max-width: 767px) {
+  .button--sm {
+    height: 2.75rem; /* 44px minimum for touch */
+    padding: 0 var(--spacing-4);
+  }
+  
+  .button--md {
+    height: 2.75rem; /* 44px minimum for touch */
+  }
+  
+  .button--lg {
+    height: 3.25rem;
+  }
+}

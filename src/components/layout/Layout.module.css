@@ -1,0 +1,135 @@
+/* Layout Component Styles */
+
+.layout {
+  min-height: 100vh;
+  background-color: var(--muted);
+}
+
+.mobileHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4) var(--spacing-6);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.hamburgerButton {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  gap: 4px;
+}
+
+.hamburgerLine {
+  width: 20px;
+  height: 2px;
+  background-color: var(--foreground);
+  border-radius: 1px;
+  transition: all var(--transition);
+}
+
+.hamburgerButton:hover .hamburgerLine {
+  background-color: var(--primary);
+}
+
+.mobileTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.main {
+  padding: 0;
+}
+
+.content {
+  padding: var(--spacing-6);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Desktop layout */
+@media (min-width: 1024px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: 1fr;
+    min-height: 100vh;
+  }
+  
+  .mobileHeader {
+    display: none;
+  }
+  
+  .main {
+    overflow-y: auto;
+    background-color: var(--muted);
+  }
+  
+  .content {
+    padding: var(--spacing-8);
+  }
+}
+
+/* Tablet layout */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .content {
+    padding: var(--spacing-6);
+  }
+  
+  .mobileHeader {
+    padding: var(--spacing-4) var(--spacing-6);
+  }
+}
+
+/* Mobile layout */
+@media (max-width: 767px) {
+  .content {
+    padding: var(--spacing-4);
+  }
+  
+  .mobileHeader {
+    padding: var(--spacing-3) var(--spacing-4);
+    min-height: 56px;
+  }
+  
+  .hamburgerButton {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  .mobileTitle {
+    font-size: 1.125rem;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .hamburgerLine {
+    transition: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .mobileHeader {
+    border-bottom-width: 2px;
+  }
+  
+  .hamburgerLine {
+    background-color: var(--foreground);
+  }
+}
