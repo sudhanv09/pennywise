@@ -1,8 +1,8 @@
 import { createForm, valiForm } from "@modular-forms/solid";
 import * as v from "valibot";
 import { Input } from "../ui/Input";
-import { Select } from "../ui/Select";
-import { ToggleGroup } from "../ui/ToggleGroup";
+import { Select, type SelectOption } from "../ui/Select";
+import { ToggleGroup, type ToggleGroupOption } from "../ui/ToggleGroup";
 import { Button } from "../ui/Button";
 import styles from "./TransactionForm.module.css";
 
@@ -62,7 +62,7 @@ const typeOptions = [
 const TransactionSchema = v.object({
   title: v.pipe(v.string(), v.minLength(1, "Title is required")),
   amount: v.number(),
-  date: v.pipe(v.date()),
+  date: v.pipe(v.string(), v.isoDate("Invalid date format")),
   category: v.picklist(categoryOptions.map((c) => c.value)),
   paymentMethod: v.picklist(paymentMethodOptions.map((p) => p.value)),
   type: v.picklist(typeOptions.map((t) => t.value)),
@@ -86,6 +86,13 @@ export function TransactionForm(props: TransactionFormProps) {
 
   const [form, { Form, Field }] = createForm<TransactionData>({
     validate: valiForm(TransactionSchema),
+    initialValues: {
+      date: getCurrentDate(),
+      category: categoryOptions[0].value,
+      paymentMethod: paymentMethodOptions[0].value,
+      type: typeOptions[0].value,
+      ...props.initialData,
+    },
   });
 
   const handleSubmit = (values: TransactionData) => {
@@ -151,7 +158,7 @@ export function TransactionForm(props: TransactionFormProps) {
             <Select
               {...props}
               label="Category"
-              options={categoryOptions}
+              options={categoryOptions as unknown as SelectOption[]}
               placeholder="Select category"
               required
               value={field.value || ""}
@@ -168,7 +175,7 @@ export function TransactionForm(props: TransactionFormProps) {
             <ToggleGroup
               {...props}
               label="Payment Method"
-              options={paymentMethodOptions}
+              options={paymentMethodOptions as unknown as ToggleGroupOption[]}
               required
               value={field.value || ""}
               error={field.error}
@@ -182,7 +189,7 @@ export function TransactionForm(props: TransactionFormProps) {
             <ToggleGroup
               {...props}
               label="Transaction Type"
-              options={typeOptions}
+              options={typeOptions as unknown as ToggleGroupOption[]}
               required
               value={field.value || ""}
               error={field.error}
