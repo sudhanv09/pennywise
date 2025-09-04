@@ -1,4 +1,4 @@
-import { splitProps, Show, For, createMemo } from 'solid-js';
+import { splitProps, Show, For, createMemo, type JSX } from 'solid-js';
 import { Select as ArkSelect, createListCollection } from '@ark-ui/solid/select';
 import { Field } from '@ark-ui/solid/field';
 import { Portal } from 'solid-js/web';
@@ -15,10 +15,12 @@ export interface SelectProps {
   placeholder?: string;
   required?: boolean;
   value?: string;
-  onChange?: (value: string) => void;
+  onChange?: JSX.EventHandler<HTMLInputElement, Event>;
+  onBlur?: JSX.EventHandler<HTMLInputElement, FocusEvent>;
   error?: string;
   class?: string;
   id?: string;
+  name?: string;
 }
 
 export function Select(props: SelectProps) {
@@ -29,9 +31,11 @@ export function Select(props: SelectProps) {
     'required',
     'value',
     'onChange',
+    'onBlur',
     'error',
     'class',
-    'id'
+    'id',
+    'name'
   ]);
   
   const selectId = () => local.id || `select-${Math.random().toString(36).substring(2, 11)}`;

@@ -1,4 +1,4 @@
-import { splitProps, Show } from 'solid-js';
+import { splitProps, Show, type JSX } from 'solid-js';
 import { Field } from '@ark-ui/solid/field';
 import styles from './Input.module.css';
 
@@ -8,10 +8,13 @@ export interface InputProps {
   required?: boolean;
   type?: 'text' | 'number' | 'date' | 'email';
   value?: string | number;
-  onInput?: (value: string) => void;
+  onInput?: JSX.EventHandler<HTMLInputElement, InputEvent>;
+  onChange?: JSX.EventHandler<HTMLInputElement, Event>;
+  onBlur?: JSX.EventHandler<HTMLInputElement, FocusEvent>;
   error?: string;
   class?: string;
   id?: string;
+  name?: string;
 }
 
 export function Input(props: InputProps) {
@@ -22,9 +25,12 @@ export function Input(props: InputProps) {
     'type',
     'value',
     'onInput',
+    'onChange',
+    'onBlur',
     'error',
     'class',
-    'id'
+    'id',
+    'name'
   ]);
   
   const inputType = () => local.type || 'text';
@@ -60,7 +66,10 @@ export function Input(props: InputProps) {
         placeholder={local.placeholder}
         required={local.required}
         value={local.value || ''}
+        name={local.name}
         onInput={(e) => local.onInput?.(e.currentTarget.value)}
+        onChange={local.onChange}
+        onBlur={local.onBlur}
         {...others}
       />
       

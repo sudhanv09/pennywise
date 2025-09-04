@@ -13,11 +13,13 @@ export interface ToggleGroupProps {
   label: string;
   options: ToggleGroupOption[];
   value?: string;
-  onChange?: (value: string) => void;
+  onChange?: JSX.EventHandler<HTMLInputElement, Event>;
+  onBlur?: JSX.EventHandler<HTMLInputElement, FocusEvent>;
   error?: string;
   required?: boolean;
   class?: string;
   id?: string;
+  name?: string;
 }
 
 export function ToggleGroup(props: ToggleGroupProps) {
@@ -26,10 +28,12 @@ export function ToggleGroup(props: ToggleGroupProps) {
     'options',
     'value',
     'onChange',
+    'onBlur',
     'error',
     'required',
     'class',
-    'id'
+    'id',
+    'name'
   ]);
   
   const toggleGroupId = () => local.id || `toggle-group-${Math.random().toString(36).substr(2, 9)}`;
