@@ -1,0 +1,115 @@
+/* TransactionForm Component Styles */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+}
+
+.fieldGroup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+.submitButton {
+  min-width: 140px;
+}
+
+/* Responsive Design */
+
+/* Mobile (up to 640px) */
+@media (max-width: 640px) {
+  .form {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+
+  .fieldGroup {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .submitButton {
+    width: 100%;
+    min-width: unset;
+  }
+}
+
+/* Tablet (641px to 768px) */
+@media (min-width: 641px) and (max-width: 768px) {
+  .form {
+    max-width: 500px;
+  }
+
+  .fieldGroup {
+    gap: var(--spacing-md);
+  }
+}
+
+/* Desktop (769px and up) */
+@media (min-width: 769px) {
+  .form {
+    max-width: 600px;
+  }
+
+  .fieldGroup {
+    gap: var(--spacing-lg);
+  }
+}
+
+/* Loading state */
+.form[data-loading="true"] {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .form * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .actions {
+    border-top-color: var(--color-gray-900);
+  }
+}
+
+/* Print styles */
+@media print {
+  .form {
+    max-width: none;
+    padding: 0;
+  }
+
+  .actions {
+    display: none;
+  }
+}

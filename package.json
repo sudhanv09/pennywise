@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ark-ui/solid": "^5.22.0",
+    "@modular-forms/solid": "^0.25.1",
     "@prisma/client": "6.15.0",
     "@t3-oss/env-core": "^0.13.8",
     "@tanstack/router-plugin": "^1.131.32",
