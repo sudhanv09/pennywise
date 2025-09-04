@@ -1,30 +1,75 @@
-import { createForm, zodForm } from "@modular-forms/solid";
-import { z } from "zod";
+import { createForm, valiForm } from "@modular-forms/solid";
+import * as v from "valibot";
 import { Input } from "../ui/Input";
 import { Select } from "../ui/Select";
 import { ToggleGroup } from "../ui/ToggleGroup";
 import { Button } from "../ui/Button";
 import styles from "./TransactionForm.module.css";
 
-const TransactionSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title too long"),
-  amount: z.coerce.number().positive("Amount must be positive"),
-  date: z.string().min(1, "Date is required"),
-  category: z
-    .enum([
-      "shopping",
-      "bills",
-      "groceries",
-      "entertainment",
-      "transport",
-      "other",
-    ]),
-  paymentMethod: z.enum(["cash", "card"]),
-  type: z.enum(["normal", "loan", "goal"]),
-  description: z.string().optional(),
+const categoryOptions = [
+  { value: "shopping", label: "Shopping" },
+  { value: "bills", label: "Bills" },
+  { value: "groceries", label: "Groceries" },
+  { value: "entertainment", label: "Entertainment" },
+  { value: "transport", label: "Transport" },
+  { value: "other", label: "Other" },
+] as const;
+
+const paymentMethodOptions = [
+  {
+    value: "cash",
+    label: "Cash",
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+        <line x1="8" y1="21" x2="16" y2="21" />
+        <line x1="12" y1="17" x2="12" y2="21" />
+      </svg>
+    ),
+  },
+  {
+    value: "card",
+    label: "Card",
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+        <line x1="1" y1="10" x2="23" y2="10" />
+      </svg>
+    ),
+  },
+] as const;
+
+const typeOptions = [
+  { value: "normal", label: "Normal" },
+  { value: "loan", label: "Loan" },
+  { value: "goal", label: "Goal" },
+] as const;
+
+const TransactionSchema = v.object({
+  title: v.pipe(v.string(), v.minLength(1, "Title is required")),
+  amount: v.number(),
+  date: v.pipe(v.date()),
+  category: v.picklist(categoryOptions.map((c) => c.value)),
+  paymentMethod: v.picklist(paymentMethodOptions.map((p) => p.value)),
+  type: v.picklist(typeOptions.map((t) => t.value)),
+  description: v.optional(v.string()),
 });
 
-type TransactionData = z.infer<typeof TransactionSchema>;
+type TransactionData = v.InferOutput<typeof TransactionSchema>;
 
 export interface TransactionFormProps {
   onSubmit: (transaction: TransactionData) => void;
@@ -40,70 +85,8 @@ export function TransactionForm(props: TransactionFormProps) {
   };
 
   const [form, { Form, Field }] = createForm<TransactionData>({
-    validate: zodForm(TransactionSchema),
-    initialValues: {
-      title: props.initialData?.title || "",
-      amount: props.initialData?.amount || 0,
-      date: props.initialData?.date || getCurrentDate(),
-      category: props.initialData?.category || "other",
-      paymentMethod: props.initialData?.paymentMethod || "card",
-      type: props.initialData?.type || "normal",
-      description: props.initialData?.description || "",
-    },
+    validate: valiForm(TransactionSchema),
   });
-
-  const categoryOptions = [
-    { value: "shopping", label: "Shopping" },
-    { value: "bills", label: "Bills" },
-    { value: "groceries", label: "Groceries" },
-    { value: "entertainment", label: "Entertainment" },
-    { value: "transport", label: "Transport" },
-    { value: "other", label: "Other" },
-  ];
-
-  const paymentMethodOptions = [
-    {
-      value: "cash",
-      label: "Cash",
-      icon: (
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-          <line x1="8" y1="21" x2="16" y2="21" />
-          <line x1="12" y1="17" x2="12" y2="21" />
-        </svg>
-      ),
-    },
-    {
-      value: "card",
-      label: "Card",
-      icon: (
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-          <line x1="1" y1="10" x2="23" y2="10" />
-        </svg>
-      ),
-    },
-  ];
-
-  const typeOptions = [
-    { value: "normal", label: "Normal" },
-    { value: "loan", label: "Loan" },
-    { value: "goal", label: "Goal" },
-  ];
 
   const handleSubmit = (values: TransactionData) => {
     props.onSubmit(values);
@@ -156,7 +139,7 @@ export function TransactionForm(props: TransactionFormProps) {
               label="Date"
               type="date"
               required
-              value={field.value || ""}
+              value={field.value || getCurrentDate()}
               error={field.error}
               class={styles.field}
             />
