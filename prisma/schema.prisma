@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+
+  runtime                = "nodejs"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "ts"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String @id @default(ulid())
+  name              String
+  email             String
+  preferredCurrency String @default("USD")
+
+  user_accounts UserAccount[]
+  transactions  Transaction[]
+  categories    Category[]
+  goals         Goal[]
+  loans         Loan[]
+  subscriptions Subscription[]
+  budgets       Budget[]
+
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@map("verification")
+}
+
+model UserAccount {
+  id       Int    @id @default(autoincrement())
+  name     String
+  currency String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  amount      Int
+  createdDate DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  account   UserAccount @relation(fields: [accountId], references: [id])
+  accountId Int
+
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  transactions Transaction[]
+
+  @@unique([userId, name])
+  @@unique([name])
+}
+
+model Goal {
+  id            Int       @id @default(autoincrement())
+  title         String
+  targetAmount  Int
+  currentAmount Int       @default(0)
+  deadline      DateTime?
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+model Loan {
+  id           Int       @id @default(autoincrement())
+  title        String
+  amount       Int
+  interestRate Float?
+  startDate    DateTime  @default(now())
+  endDate      DateTime?
+
+  type      LoanType
+  repayment RepaymentType
+  status    LoanStatus    @default(ACTIVE)
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+enum LoanType {
+  BORROWED
+  LENT
+}
+
+enum RepaymentType {
+  ONE_TIME
+  INSTALLMENTS
+}
+
+enum LoanStatus {
+  ACTIVE
+  PAID
+  DEFAULTED
+}
+
+model Subscription {
+  id           Int          @id @default(autoincrement())
+  name         String
+  amount       Int
+  startDate    DateTime     @default(now())
+  renewalCycle RenewalCycle
+  nextPayment  DateTime
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
+enum RenewalCycle {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model Budget {
+  id        Int      @id @default(autoincrement())
+  name      String
+  amount    Int
+  startDate DateTime
+  endDate   DateTime
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
