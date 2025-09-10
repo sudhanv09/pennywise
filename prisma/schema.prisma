@@ -94,12 +94,19 @@ model UserAccount {
   transactions Transaction[]
 }
 
+enum TransactionType {
+  Expense
+  Income
+  Transfer
+}
+
 model Transaction {
-  id          Int      @id @default(autoincrement())
+  id          String          @id @default(ulid())
   title       String
   description String?
   amount      Int
-  createdDate DateTime @default(now())
+  createdDate DateTime        @default(now())
+  type        TransactionType
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
