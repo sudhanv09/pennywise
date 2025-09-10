@@ -9,6 +9,8 @@
   import Handcoins from "@lucide/svelte/icons/hand-coins";
   import CalendarCheck2 from "@lucide/svelte/icons/calendar-check-2";
   import CirclePoundSterling from "@lucide/svelte/icons/circle-pound-sterling";
+  import Settings from "@lucide/svelte/icons/settings";
+  import LogOut from "@lucide/svelte/icons/log-out";
 
   const data = {
     main: [
@@ -45,6 +47,18 @@
         icon: CalendarCheck2,
       },
     ],
+    footer: [
+      {
+        title: "Settings",
+        url: "#",
+        icon: Settings,
+      },
+      {
+        title: "Logout",
+        url: "#",
+        icon: LogOut,
+      },
+    ],
   };
   let { ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
@@ -71,10 +85,12 @@
           {#each data.main as item (item.title)}
             <Sidebar.MenuItem>
               <Sidebar.MenuButton tooltipContent={item.title}>
-                {#if item.icon}
-                  <item.icon />
-                {/if}
-                <span>{item.title}</span>
+                {#snippet child({ props })}
+                  <a href={item.url} {...props}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </a>
+                {/snippet}
               </Sidebar.MenuButton>
             </Sidebar.MenuItem>
           {/each}
@@ -88,10 +104,12 @@
           {#each data.user as item (item.title)}
             <Sidebar.MenuItem>
               <Sidebar.MenuButton tooltipContent={item.title}>
-                {#if item.icon}
-                  <item.icon />
-                {/if}
-                <span>{item.title}</span>
+                {#snippet child({ props })}
+                  <a href={item.url} {...props}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </a>
+                {/snippet}
               </Sidebar.MenuButton>
             </Sidebar.MenuItem>
           {/each}
@@ -99,7 +117,20 @@
       </Sidebar.GroupContent>
     </Sidebar.Group>
   </Sidebar.Content>
-  <!-- <Sidebar.Footer>
-    <NavUser user={data.user} />
-  </Sidebar.Footer> -->
+  <Sidebar.Footer>
+    <Sidebar.Menu>
+      {#each data.footer as item (item.title)}
+        <Sidebar.MenuItem>
+          <Sidebar.MenuButton tooltipContent={item.title}>
+            {#snippet child({ props })}
+              <a href={item.url} {...props}>
+                <item.icon />
+                <span>{item.title}</span>
+              </a>
+            {/snippet}
+          </Sidebar.MenuButton>
+        </Sidebar.MenuItem>
+      {/each}
+    </Sidebar.Menu>
+  </Sidebar.Footer>
 </Sidebar.Root>
