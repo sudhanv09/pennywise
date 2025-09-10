@@ -1,14 +1,13 @@
 <script lang="ts">
-  import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-  } from "$lib/components/ui/card";
   import * as Select from "$lib/components/ui/select/index.js";
   import { Input } from "$lib/components/ui/input";
-  import { TransactionType, type Category } from "$lib/types";
+  import {
+    TransactionType,
+    type Category,
+    type Goal,
+    type Loan,
+    type Account,
+  } from "$lib/types";
   import ChevronUp from "@lucide/svelte/icons/chevron-up";
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
   import ArrowLeftRight from "@lucide/svelte/icons/arrow-left-right";
@@ -28,7 +27,10 @@
   }: {
     data: {
       form: SuperValidated<Infer<typeof TransactionSchema>>;
-      category: Category[];
+      categories: Category[];
+      goals: Goal[];
+      loans: Loan[];
+      accounts: Account[];
     };
   } = $props();
 
@@ -97,7 +99,7 @@
                 {$formData.category ? $formData.category : "Select a category"}
               </Select.Trigger>
               <Select.Content>
-                {#each data.category as item}
+                {#each data.categories as item}
                   <Select.Item value={item.name} label={item.name} />
                 {/each}
               </Select.Content>
@@ -144,17 +146,67 @@
       <Form.Field {form} name="account">
         <Form.Control>
           {#snippet children({ props })}
+            <Form.Label>Accounts</Form.Label>
             <ToggleGroup.Root
               {...props}
               type="single"
               bind:value={$formData.account}
             >
-              <ToggleGroup.Item
-                value={TransactionType.EXPENSE}
-                aria-label="Expense"
-              >
-                <ChevronDown class="size-6" /> Expense
+              <ToggleGroup.Item value="Cash" aria-label="Cash">
+                Cash
               </ToggleGroup.Item>
+              {#each data.accounts as account}
+                <ToggleGroup.Item
+                  value={account.name}
+                  aria-label={account.name}
+                >
+                  {account.name}
+                </ToggleGroup.Item>
+              {/each}
+            </ToggleGroup.Root>
+          {/snippet}
+        </Form.Control>
+      </Form.Field>
+
+      <Form.Field {form} name="goal">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Goals</Form.Label>
+            <ToggleGroup.Root
+              {...props}
+              type="single"
+              bind:value={$formData.goal}
+            >
+              <ToggleGroup.Item value="No Goal" aria-label="No Goal">
+                No Goal
+              </ToggleGroup.Item>
+              {#each data.goals as goal}
+                <ToggleGroup.Item value={goal.title} aria-label={goal.title}>
+                  {goal.title}
+                </ToggleGroup.Item>
+              {/each}
+            </ToggleGroup.Root>
+          {/snippet}
+        </Form.Control>
+      </Form.Field>
+
+      <Form.Field {form} name="loan">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Loans</Form.Label>
+            <ToggleGroup.Root
+              {...props}
+              type="single"
+              bind:value={$formData.loan}
+            >
+              <ToggleGroup.Item value="No Loans" aria-label="No Loans">
+                No Loans
+              </ToggleGroup.Item>
+              {#each data.loans as loan}
+                <ToggleGroup.Item value={loan.title} aria-label={loan.title}>
+                  {loan.title}
+                </ToggleGroup.Item>
+              {/each}
             </ToggleGroup.Root>
           {/snippet}
         </Form.Control>
