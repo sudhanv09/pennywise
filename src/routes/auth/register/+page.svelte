@@ -20,7 +20,7 @@
     validators: valibotClient(registerSchema),
   });
 
-  const { form: formData, enhance } = form;
+  const { form: formData, enhance, errors } = form;
 </script>
 
 <div
@@ -66,7 +66,7 @@
               <Form.Control>
                 {#snippet children({ props })}
                   <Form.Label>Email</Form.Label>
-                  <Input {...props} bind:value={$formData.email} />
+                  <Input {...props} bind:value={$formData.email} type="email" />
                 {/snippet}
               </Form.Control>
               <Form.FieldErrors />
@@ -76,7 +76,7 @@
               <Form.Control>
                 {#snippet children({ props })}
                   <Form.Label>Password</Form.Label>
-                  <Input {...props} bind:value={$formData.password} />
+                  <Input {...props} bind:value={$formData.password} type="password" />
                 {/snippet}
               </Form.Control>
               <Form.FieldErrors />
@@ -86,7 +86,7 @@
               <Form.Control>
                 {#snippet children({ props })}
                   <Form.Label>Confirm Password</Form.Label>
-                  <Input {...props} bind:value={$formData.confirmPassword} />
+                  <Input {...props} bind:value={$formData.confirmPassword} type="password" />
                 {/snippet}
               </Form.Control>
               <Form.FieldErrors />
