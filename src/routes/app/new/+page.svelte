@@ -1,13 +1,15 @@
 <script lang="ts">
   import * as Select from "$lib/components/ui/select/index.js";
   import { Input } from "$lib/components/ui/input";
-  import {
-    TransactionType,
-    type Category,
-    type Goal,
-    type Loan,
-    type Account,
-  } from "$lib/types";
+
+  import type {
+    Category,
+    Goal,
+    Loan,
+    UserAccount,
+  } from "@/generated/prisma/client";
+  import { TransactionType } from "@/generated/prisma/client";
+
   import ChevronUp from "@lucide/svelte/icons/chevron-up";
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
   import ArrowLeftRight from "@lucide/svelte/icons/arrow-left-right";
@@ -30,7 +32,7 @@
       categories: Category[];
       goals: Goal[];
       loans: Loan[];
-      accounts: Account[];
+      accounts: UserAccount[];
     };
   } = $props();
 
@@ -56,24 +58,24 @@
             <ToggleGroup.Root
               type="single"
               {...props}
-              bind:value={$formData.type}
+              bind:value={$formData.type as TransactionType}
             >
               <ToggleGroup.Item
-                value={TransactionType.EXPENSE}
+                value={TransactionType.Expense}
                 aria-label="Expense"
               >
                 <ChevronDown class="size-6" /> Expense
               </ToggleGroup.Item>
               <Separator orientation="vertical" />
               <ToggleGroup.Item
-                value={TransactionType.INCOME}
+                value={TransactionType.Income}
                 aria-label="Income"
               >
                 <ChevronUp class="size-6" /> Income
               </ToggleGroup.Item>
               <Separator orientation="vertical" />
               <ToggleGroup.Item
-                value={TransactionType.TRANSFER}
+                value={TransactionType.Transfer}
                 aria-label="Transfer"
               >
                 <ArrowLeftRight class="size-6" /> Transfer
@@ -92,8 +94,8 @@
             <Form.Label>Category</Form.Label>
             <Select.Root
               type="single"
-              bind:value={$formData.category}
-              name={$formData.category}
+              bind:value={$formData.category as string}
+              name={$formData.category as string}
             >
               <Select.Trigger {...props}>
                 {$formData.category ? $formData.category : "Select a category"}
@@ -150,7 +152,7 @@
             <ToggleGroup.Root
               {...props}
               type="single"
-              bind:value={$formData.account}
+              bind:value={$formData.account as string}
             >
               <ToggleGroup.Item value="Cash" aria-label="Cash">
                 Cash
@@ -175,7 +177,7 @@
             <ToggleGroup.Root
               {...props}
               type="single"
-              bind:value={$formData.goal}
+              bind:value={$formData.goal as string}
             >
               <ToggleGroup.Item value="No Goal" aria-label="No Goal">
                 No Goal
@@ -197,7 +199,7 @@
             <ToggleGroup.Root
               {...props}
               type="single"
-              bind:value={$formData.loan}
+              bind:value={$formData.loan as string}
             >
               <ToggleGroup.Item value="No Loans" aria-label="No Loans">
                 No Loans

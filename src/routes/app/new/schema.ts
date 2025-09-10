@@ -1,5 +1,5 @@
-import * as v from "valibot"
-import { TransactionType } from "$lib/types";
+import * as v from "valibot";
+import { TransactionType } from "@/generated/prisma/enums";
 
 function getCurrentDate() {
   return new Date().toISOString().split("T")[0]; // YYYY-MM-DD
@@ -13,7 +13,7 @@ export const TransactionSchema = v.object({
   title: v.string(),
   description: v.optional(v.string()),
   amount: v.pipe(v.number(), v.minValue(1)),
-  type: v.optional(v.enum(TransactionType), TransactionType.EXPENSE),
+  type: v.optional(v.enum(TransactionType), TransactionType.Expense),
   category: v.string(),
   account: v.optional(v.string(), "Cash"),
   goal: v.optional(v.string(), "No Goal"),
