@@ -1,13 +1,5 @@
 import { prisma } from "$lib/db";
-
-export interface Goal {
-  id: number;
-  title: string;
-  targetAmount: number;
-  currentAmount: number;
-  deadline?: Date | null;
-  userId: string;
-}
+import type { Goal } from "@/generated/prisma/client";
 
 export async function getGoals(): Promise<Goal[]> {
   return await prisma.goal.findMany();

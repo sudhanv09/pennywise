@@ -1,13 +1,5 @@
 import { prisma } from "$lib/db";
-
-export interface Budget {
-  id: number;
-  name: string;
-  amount: number;
-  startDate: Date;
-  endDate: Date;
-  userId: string;
-}
+import type { Budget } from "@/generated/prisma/client";
 
 export async function getBudgets(): Promise<Budget[]> {
   return await prisma.budget.findMany();

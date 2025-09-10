@@ -1,10 +1,5 @@
 import { prisma } from "$lib/db";
-
-export interface Category {
-  id: number;
-  name: string;
-  userId: string | null;
-}
+import type { Category } from "@/generated/prisma/client";
 
 export async function createCategory(
   entry: Omit<Category, "id">

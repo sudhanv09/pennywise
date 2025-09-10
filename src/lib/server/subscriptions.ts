@@ -1,21 +1,5 @@
 import { prisma } from "$lib/db";
-
-export enum RenewalCycle {
-  DAILY = "DAILY",
-  WEEKLY = "WEEKLY",
-  MONTHLY = "MONTHLY",
-  YEARLY = "YEARLY",
-}
-
-export interface Subscription {
-  id: number;
-  name: string;
-  amount: number;
-  startDate: Date;
-  renewalCycle: RenewalCycle;
-  nextPayment: Date;
-  userId: string;
-}
+import type { Subscription } from "@/generated/prisma/client";
 
 export async function getSubscriptions(): Promise<Subscription[]> {
   return await prisma.subscription.findMany();
@@ -40,6 +24,6 @@ export async function updateSubscription(
   return await prisma.subscription.update({ where: { id }, data });
 }
 
-export async function deleteSubscription(id: number): Promise<Subscription> {
+export async function deleteSubscription(id: number) {
   return await prisma.subscription.delete({ where: { id } });
 }
