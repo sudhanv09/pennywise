@@ -1,8 +1,8 @@
-import { superValidate, setError } from "sveltekit-superforms";
+import { superValidate, message } from "sveltekit-superforms";
 import { registerSchema } from "./schema";
 import { valibot } from "sveltekit-superforms/adapters";
 import type { PageServerLoad, Actions } from "./$types";
-import { fail, redirect } from "@sveltejs/kit";
+import { error, fail, redirect } from "@sveltejs/kit";
 import { auth } from "@/lib/auth";
 import { APIError } from "better-auth";
 
@@ -28,11 +28,19 @@ export const actions: Actions = {
           password: form.data.password,
         },
       });
-      throw redirect(303, "/app");
-    } catch (error) {
-      if (error instanceof APIError) {
-        return setError(form, "email", "Email already exists");
+    } catch (err) {
+      if (err instanceof APIError) {
+        if (err.status === "UNPROCESSABLE_ENTITY") {
+          return message(form, err.body?.message, { status: 422 });
+        }
+        if (err.status === "BAD_REQUEST") {
+          return message(form, "Invalid request. Please check your input.", { status: 400 });
+        }
       }
+
+      return error(500, "An error occured during registration")
     }
+
+    redirect(303, "/app");
   },
 };

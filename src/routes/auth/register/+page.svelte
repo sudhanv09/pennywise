@@ -2,6 +2,8 @@
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
   import * as Form from "$lib/components/ui/form";
+  import * as Alert from "$lib/components/ui/alert/index.js";
+  import CircleAlertIcon from "@lucide/svelte/icons/circle-alert";
 
   import { registerSchema } from "./schema";
   import {
@@ -18,9 +20,10 @@
 
   const form = superForm(data.form, {
     validators: valibotClient(registerSchema),
+    resetForm: false,
   });
 
-  const { form: formData, enhance, errors } = form;
+  const { form: formData, enhance, message } = form;
 </script>
 
 <div
@@ -31,6 +34,13 @@
       <div class="text-center">
         <h1 class="text-xl">Create your account</h1>
       </div>
+      {#if $message}
+        <Alert.Root variant="destructive">
+          <CircleAlertIcon class="size-4" />
+          <Alert.Title>Error</Alert.Title>
+          <Alert.Description>{$message}</Alert.Description>
+        </Alert.Root>
+      {/if}
       <div class="grid gap-6">
         <div class="flex flex-col gap-4">
           <Button variant="outline" class="w-full rounded-full">
@@ -76,7 +86,11 @@
               <Form.Control>
                 {#snippet children({ props })}
                   <Form.Label>Password</Form.Label>
-                  <Input {...props} bind:value={$formData.password} type="password" />
+                  <Input
+                    {...props}
+                    bind:value={$formData.password}
+                    type="password"
+                  />
                 {/snippet}
               </Form.Control>
               <Form.FieldErrors />
@@ -86,7 +100,11 @@
               <Form.Control>
                 {#snippet children({ props })}
                   <Form.Label>Confirm Password</Form.Label>
-                  <Input {...props} bind:value={$formData.confirmPassword} type="password" />
+                  <Input
+                    {...props}
+                    bind:value={$formData.confirmPassword}
+                    type="password"
+                  />
                 {/snippet}
               </Form.Control>
               <Form.FieldErrors />

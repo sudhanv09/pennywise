@@ -9,6 +9,8 @@
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
   import * as Form from "$lib/components/ui/form";
+  import * as Alert from "$lib/components/ui/alert/index.js";
+  import CircleAlertIcon from "@lucide/svelte/icons/circle-alert";
 
   import { loginSchema } from "./schema";
   import {
@@ -23,9 +25,10 @@
 
   const form = superForm(data.form, {
     validators: valibotClient(loginSchema),
+    resetForm: false,
   });
 
-  const { form: formData, enhance } = form;
+  const { form: formData, enhance, message } = form;
 </script>
 
 <div
@@ -35,6 +38,13 @@
     <a href="/" class="flex items-center gap-2 self-center font-medium">
       Pennywise
     </a>
+    {#if $message}
+      <Alert.Root variant="destructive">
+        <CircleAlertIcon class="size-4" />
+        <Alert.Title>Error</Alert.Title>
+        <Alert.Description>{$message}</Alert.Description>
+      </Alert.Root>
+    {/if}
     <div class="flex flex-col gap-6">
       <Card>
         <CardHeader class="text-center">
@@ -86,7 +96,11 @@
                           Forgot your password?
                         </a>
                       </div>
-                      <Input {...props} bind:value={$formData.password} />
+                      <Input
+                        {...props}
+                        bind:value={$formData.password}
+                        type="password"
+                      />
                     {/snippet}
                   </Form.Control>
                   <Form.FieldErrors />
