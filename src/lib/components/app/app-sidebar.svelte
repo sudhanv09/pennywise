@@ -28,29 +28,29 @@
     user: [
       {
         title: "Accounts",
-        url: "#",
+        url: "/app/accounts",
         icon: Landmark,
       },
       {
         title: "Goals",
-        url: "#",
+        url: "/app/goals",
         icon: Goal,
       },
       {
         title: "Loan",
-        url: "#",
+        url: "/app/loans",
         icon: Handcoins,
       },
       {
         title: "Subscriptions",
-        url: "#",
+        url: "/app/subscriptions",
         icon: CalendarCheck2,
       },
     ],
     footer: [
       {
         title: "Settings",
-        url: "#",
+        url: "/settings",
         icon: Settings,
       },
       {
