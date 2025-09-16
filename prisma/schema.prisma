@@ -131,12 +131,19 @@ model Category {
   @@unique([name])
 }
 
+enum GoalType {
+  Savings
+  Expense
+}
+
 model Goal {
   id            Int       @id @default(autoincrement())
   title         String
+  GoalType      GoalType
   targetAmount  Int
   currentAmount Int       @default(0)
-  deadline      DateTime?
+  currentDate   DateTime @default(now())
+  tillDate      DateTime
 
   user   User   @relation(fields: [userId], references: [id])
   userId String
