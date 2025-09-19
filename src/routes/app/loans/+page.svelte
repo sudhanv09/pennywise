@@ -1,9 +1,8 @@
 <script lang="ts">
   import Separator from "@/lib/components/ui/separator/separator.svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
-  import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
+  import { buttonVariants } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
-  import { Label } from "$lib/components/ui/label/index.js";
   import * as Form from "$lib/components/ui/form/index.js";
   import * as ToggleGroup from "$lib/components/ui/toggle-group/index.js";
 
@@ -44,150 +43,139 @@
         <form method="POST" use:enhance>
           <div class="grid gap-4 py-4">
             <Form.Field form={superFormObj} name="type">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Type</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <ToggleGroup.Root
-                        type="single"
-                        {...props}
-                        class="col-span-3"
-                        bind:value={$form.type}
-                      >
-                        <ToggleGroup.Item value="BORROWED">
-                          <ArrowLeftRight />
-                        </ToggleGroup.Item>
-                        <ToggleGroup.Item value="LENT">
-                          <Repeat />
-                        </ToggleGroup.Item>
-                      </ToggleGroup.Root>
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label>Type</Form.Label>
+                    <ToggleGroup.Root
+                      type="single"
+                      size="lg"
+                      {...props}
+                      class="col-span-3 gap-1"
+                      bind:value={$form.type}
+                    >
+                      <ToggleGroup.Item value="BORROWED">
+                        <ArrowLeftRight /> Borrowed
+                      </ToggleGroup.Item>
+                      <ToggleGroup.Item value="LENT">
+                        <Repeat /> Lent
+                      </ToggleGroup.Item>
+                    </ToggleGroup.Root>
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
 
             <Form.Field form={superFormObj} name="title">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Title</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        bind:value={$form.title}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label>Title</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      bind:value={$form.title}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
 
             <Form.Field form={superFormObj} name="repayment">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Repayment</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <ToggleGroup.Root
-                        type="single"
-                        {...props}
-                        class="col-span-3"
-                        bind:value={$form.repayment}
-                      >
-                        <ToggleGroup.Item value="ONE_TIME">
-                          <DollarSign />
-                        </ToggleGroup.Item>
-                        <ToggleGroup.Item value="INSTALLMENTS">
-                          <Calendar />
-                        </ToggleGroup.Item>
-                      </ToggleGroup.Root>
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">Repayment</Form.Label>
+                    <ToggleGroup.Root
+                      type="single"
+                      size="lg"
+                      {...props}
+                      class="col-span-3 gap-1"
+                      bind:value={$form.repayment}
+                    >
+                      <ToggleGroup.Item value="ONE_TIME">
+                        <DollarSign /> One Time
+                      </ToggleGroup.Item>
+                      <ToggleGroup.Item value="INSTALLMENTS">
+                        <Calendar /> Installments
+                      </ToggleGroup.Item>
+                    </ToggleGroup.Root>
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
 
             <Form.Field form={superFormObj} name="amount">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Amount</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="number"
-                        bind:value={$form.amount}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">Amount</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="number"
+                      bind:value={$form.amount}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
 
             <Form.Field form={superFormObj} name="interestRate">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Interest Rate (%)</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="number"
-                        step="0.01"
-                        bind:value={$form.interestRate}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label>Interest Rate (%)</Form.Label
+                    >
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="number"
+                      step="0.01"
+                      bind:value={$form.interestRate}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
 
             <Form.Field form={superFormObj} name="startDate">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Start Date</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="date"
-                        bind:value={$form.startDate}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label>Start Date</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="date"
+                      bind:value={$form.startDate}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
 
             <Form.Field form={superFormObj} name="endDate">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">End Date</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="date"
-                        bind:value={$form.endDate}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label>End Date</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="date"
+                      bind:value={$form.endDate}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
           </div>
           <Dialog.Footer>
