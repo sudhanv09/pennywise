@@ -4,10 +4,25 @@
   import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import { Label } from "$lib/components/ui/label/index.js";
+  import currencies from "$lib/assets/currency.json";
+  import * as Select from "$lib/components/ui/select/index.js";
 
   import Plus from "@lucide/svelte/icons/plus";
 
+  import * as Form from "$lib/components/ui/form/index.js";
+  import { superForm } from "sveltekit-superforms";
+
   let { data } = $props();
+  const currencyList = Object.values(currencies);
+
+  const form = superForm(data.form);
+  const { form: formData, enhance } = form;
+
+  let dialogOpen = $state(false);
+
+  const triggerContent = $derived(
+    currencyList.find((c) => c.code === $formData.currency)?.code ?? "Select a currency"
+  );
 </script>
 
 <div class="container mx-auto mt-12">
@@ -20,7 +35,7 @@
         Manage your bank accounts here
       </p>
     </div>
-    <Dialog.Root>
+    <Dialog.Root bind:open={dialogOpen}>
       <Dialog.Trigger class={buttonVariants({ variant: "outline" })}>
         <Plus /> Add</Dialog.Trigger
       >
@@ -28,19 +43,58 @@
         <Dialog.Header>
           <Dialog.Title>Add a new Account</Dialog.Title>
         </Dialog.Header>
-        <div class="grid gap-4 py-4">
-          <div class="grid grid-cols-4 items-center gap-4">
-            <Label for="name" class="text-right">Name</Label>
-            <Input id="name" value="Pedro Duarte" class="col-span-3" />
+        <form method="POST" use:enhance>
+          <div class="grid gap-4 py-4">
+            <Form.Field {form} name="name">
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label for="name" class="text-right">Name</Form.Label>
+                    <Input
+                      {...props}
+                      id="name"
+                      class="col-span-3"
+                      bind:value={$formData.name}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
+            </Form.Field>
+            <Form.Field {form} name="currency">
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label for="currency" class="text-right">Currency</Form.Label>
+                    <Select.Root
+                      type="single"
+                      name="currency"
+                      bind:value={$formData.currency}
+                    >
+                      <Select.Trigger class="w-[180px] col-span-3">
+                        {triggerContent}
+                      </Select.Trigger>
+                      <Select.Content>
+                        <Select.Group>
+                          <Select.Label>Currencies</Select.Label>
+                          {#each currencyList as currency (currency.code)}
+                            <Select.Item value={currency.code} label={currency.name}>
+                              {currency.code}
+                            </Select.Item>
+                          {/each}
+                        </Select.Group>
+                      </Select.Content>
+                    </Select.Root>
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
+            </Form.Field>
           </div>
-          <div class="grid grid-cols-4 items-center gap-4">
-            <Label for="username" class="text-right">Currency</Label>
-            <Input id="username" value="@peduarte" class="col-span-3" />
-          </div>
-        </div>
-        <Dialog.Footer>
-          <Button type="submit">Save changes</Button>
-        </Dialog.Footer>
+          <Dialog.Footer>
+            <Form.Button type="submit">Save changes</Form.Button>
+          </Dialog.Footer>
+        </form>
       </Dialog.Content>
     </Dialog.Root>
   </header>

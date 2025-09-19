@@ -16,12 +16,12 @@
     main: [
       {
         title: "Dashboard",
-        url: "#",
+        url: "/app",
         icon: House,
       },
       {
         title: "Activity",
-        url: "#",
+        url: "/app/activity",
         icon: SquareActivity,
       },
     ],
