@@ -4,6 +4,7 @@ import { superValidate } from "sveltekit-superforms/server";
 import { valibot } from "sveltekit-superforms/adapters";
 import { fail } from "@sveltejs/kit";
 import { goalSchema } from "./schema";
+import { toast } from "svelte-sonner";
 
 
 export const load = (async () => {
@@ -13,6 +14,7 @@ export const load = (async () => {
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
+    console.log("got request")
     const form = await superValidate(request, valibot(goalSchema));
 
     if (!form.valid) {
@@ -20,6 +22,7 @@ export const actions: Actions = {
     }
 
     const { title, goalType, targetAmount, currentDate, tillDate } = form.data;
+    console.log(title)
 
     try {
       await createGoal({
@@ -31,6 +34,8 @@ export const actions: Actions = {
         tillDate: new Date(tillDate),
         userId: locals.user.id,
       });
+
+      toast.success("Saved successfully")
 
       return { form };
     } catch (error) {

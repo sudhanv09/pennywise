@@ -41,100 +41,90 @@
         <form method="POST" use:enhance>
           <div class="grid gap-4 py-4">
             <Form.Field {form} name="goalType">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Type</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <ToggleGroup.Root
-                        type="single"
-                        {...props}
-                        class="col-span-3"
-                        bind:value={$formData.goalType}
-                      >
-                        <ToggleGroup.Item value="Savings">
-                          <ChevronUp />
-                        </ToggleGroup.Item>
-                        <ToggleGroup.Item value="Expense">
-                          <ChevronDown />
-                        </ToggleGroup.Item>
-                      </ToggleGroup.Root>
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">Type</Form.Label>
+                    <ToggleGroup.Root
+                      type="single"
+                      {...props}
+                      class="col-span-3"
+                      bind:value={$formData.goalType}
+                    >
+                      <ToggleGroup.Item value="Savings">
+                        <ChevronUp class="text-green-600"/> Savings
+                      </ToggleGroup.Item>
+                      <ToggleGroup.Item value="Expense">
+                        <ChevronDown class="text-red-600"/> Expense
+                      </ToggleGroup.Item>
+                    </ToggleGroup.Root>
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
             <Form.Field {form} name="title">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Title</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        bind:value={$formData.title}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">Title</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      bind:value={$formData.title}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
             <Form.Field {form} name="targetAmount">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Goal Amount</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="number"
-                        bind:value={$formData.targetAmount}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label>Goal Amount</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="number"
+                      bind:value={$formData.targetAmount}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
             <Form.Field {form} name="currentDate">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">From</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="date"
-                        bind:value={$formData.currentDate}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">From</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="date"
+                      bind:value={$formData.currentDate}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
             <Form.Field {form} name="tillDate">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Till</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="date"
-                        bind:value={$formData.tillDate}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">Till</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="date"
+                      bind:value={$formData.tillDate}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
           </div>
           <Dialog.Footer>
