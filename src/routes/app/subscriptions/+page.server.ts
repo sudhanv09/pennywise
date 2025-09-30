@@ -6,9 +6,9 @@ import { subscriptionSchema } from "./schema";
 import { fail } from "@sveltejs/kit";
 import { invalidateAll } from "$app/navigation";
 
-export const load = (async () => {
+export const load = (async ({ locals }) => {
   const form = await superValidate(valibot(subscriptionSchema));
-  return { subscriptions: await getSubscriptions(), form };
+  return { subscriptions: await getSubscriptions(locals.user!.id), form };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {

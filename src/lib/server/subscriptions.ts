@@ -1,8 +1,10 @@
 import { prisma } from "$lib/db";
 import type { Subscription } from "@/generated/prisma/client";
 
-export async function getSubscriptions(): Promise<Subscription[]> {
-  return await prisma.subscription.findMany();
+export async function getSubscriptions(userId: string): Promise<Subscription[]> {
+  return await prisma.subscription.findMany({
+    where: { userId }
+  });
 }
 
 export async function createSubscription(

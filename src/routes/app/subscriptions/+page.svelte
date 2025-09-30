@@ -13,6 +13,14 @@
   import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
   import TrendingUp from "@lucide/svelte/icons/trending-up";
 
+  import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+  } from "@/lib/components/ui/card/index.js";
+  import { Badge } from "$lib/components/ui/badge/index.js";
+
   let { data } = $props();
 
   const superFormObj = superForm(data.form);
@@ -42,29 +50,26 @@
         <form method="POST" use:enhance>
           <div class="grid gap-4 py-4">
             <Form.Field form={superFormObj} name="name">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Name</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        bind:value={$form.name}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">Name</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      bind:value={$form.name}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
 
             <Form.Field form={superFormObj} name="amount">
-              {#snippet children({ errors })}
                 <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Amount</Form.Label>
                   <Form.Control>
                     {#snippet children({ props })}
+                      <Form.Label class="text-right">Amount</Form.Label>
                       <Input
                         {...props}
                         class="col-span-3"
@@ -75,77 +80,69 @@
                   </Form.Control>
                 </div>
                 <Form.FieldErrors />
-              {/snippet}
             </Form.Field>
 
             <Form.Field form={superFormObj} name="renewalCycle">
-              {#snippet children({ errors })}
                 <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Cycle</Form.Label>
                   <Form.Control>
                     {#snippet children({ props })}
+                      <Form.Label class="text-right">Cycle</Form.Label>
                       <ToggleGroup.Root
                         type="single"
                         {...props}
-                        class="col-span-3"
                         bind:value={$form.renewalCycle}
                       >
                         <ToggleGroup.Item value="DAILY">
-                          <Clock />
+                          <Clock /> Daily
                         </ToggleGroup.Item>
                         <ToggleGroup.Item value="WEEKLY">
-                          <Calendar />
+                          <Calendar /> Weekly
                         </ToggleGroup.Item>
                         <ToggleGroup.Item value="MONTHLY">
-                          <RotateCcw />
+                          <RotateCcw /> Monthly
                         </ToggleGroup.Item>
                         <ToggleGroup.Item value="YEARLY">
-                          <TrendingUp />
+                          <TrendingUp /> Yearly
                         </ToggleGroup.Item>
                       </ToggleGroup.Root>
                     {/snippet}
                   </Form.Control>
                 </div>
                 <Form.FieldErrors />
-              {/snippet}
             </Form.Field>
 
             <Form.Field form={superFormObj} name="startDate">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Start Date</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="date"
-                        bind:value={$form.startDate}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">Start Date</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="date"
+                      bind:value={$form.startDate}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
 
             <Form.Field form={superFormObj} name="nextPayment">
-              {#snippet children({ errors })}
-                <div class="grid grid-cols-4 items-center gap-4">
-                  <Form.Label class="text-right">Next Payment</Form.Label>
-                  <Form.Control>
-                    {#snippet children({ props })}
-                      <Input
-                        {...props}
-                        class="col-span-3"
-                        type="date"
-                        bind:value={$form.nextPayment}
-                      />
-                    {/snippet}
-                  </Form.Control>
-                </div>
-                <Form.FieldErrors />
-              {/snippet}
+              <div class="grid grid-cols-4 items-center gap-4">
+                <Form.Control>
+                  {#snippet children({ props })}
+                    <Form.Label class="text-right">Next Payment</Form.Label>
+                    <Input
+                      {...props}
+                      class="col-span-3"
+                      type="date"
+                      bind:value={$form.nextPayment}
+                    />
+                  {/snippet}
+                </Form.Control>
+              </div>
+              <Form.FieldErrors />
             </Form.Field>
           </div>
           <Dialog.Footer>
@@ -157,15 +154,31 @@
   </header>
   <Separator />
 
-  <ul>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
     {#if data.subscriptions.length === 0}
-      <p class="text-neutral-500 text-center mt-24">
-        No subscriptions found. Add a new one
-      </p>
+      <div class="col-span-full text-center mt-24">
+        <p class="text-neutral-500">No subscriptions found. Add a new one</p>
+      </div>
     {:else}
-      {#each data.subscriptions as subscription}
-        <li>{subscription.name}</li>
+      {#each data.subscriptions as subscription, index}
+        <Card>
+          <CardHeader>
+            <CardTitle>{subscription.name}</CardTitle>
+            <Badge variant="secondary">{subscription.renewalCycle}</Badge>
+          </CardHeader>
+          <CardContent class="space-y-2">
+            <p class="text-lg font-semibold">
+              {subscription.amount.toLocaleString()}
+            </p>
+            <p class="text-sm text-neutral-600">
+              Next Payment: {subscription.nextPayment.toLocaleDateString()}
+            </p>
+            <p class="text-sm text-neutral-600">
+              Started: {subscription.startDate.toLocaleDateString()}
+            </p>
+          </CardContent>
+        </Card>
       {/each}
     {/if}
-  </ul>
+  </div>
 </div>
