@@ -1,9 +1,8 @@
 <script lang="ts">
   import Separator from "@/lib/components/ui/separator/separator.svelte";
   import * as Dialog from "$lib/components/ui/dialog/index.js";
-  import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
+  import { buttonVariants } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
-  import { Label } from "$lib/components/ui/label/index.js";
   import currencies from "$lib/assets/currency.json";
   import * as Select from "$lib/components/ui/select/index.js";
 
@@ -11,6 +10,12 @@
 
   import * as Form from "$lib/components/ui/form/index.js";
   import { superForm } from "sveltekit-superforms";
+  import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+  } from "@/lib/components/ui/card/index.js";
 
   let { data } = $props();
   const currencyList = Object.values(currencies);
@@ -21,8 +26,11 @@
   let dialogOpen = $state(false);
 
   const triggerContent = $derived(
-    currencyList.find((c) => c.code === $formData.currency)?.code ?? "Select a currency"
+    currencyList.find((c) => c.code === $formData.currency)?.code ??
+      "Select a currency"
   );
+
+  const cardColors = ['border-l-2 border-blue-500', 'border-l-2 border-green-500', 'border-l-2 border-purple-500', 'border-l-2 border-orange-500', 'border-l-2 border-red-500'];
 </script>
 
 <div class="container mx-auto mt-12">
@@ -65,7 +73,9 @@
               <div class="grid grid-cols-4 items-center gap-4">
                 <Form.Control>
                   {#snippet children({ props })}
-                    <Form.Label for="currency" class="text-right">Currency</Form.Label>
+                    <Form.Label for="currency" class="text-right"
+                      >Currency</Form.Label
+                    >
                     <Select.Root
                       type="single"
                       name="currency"
@@ -78,7 +88,10 @@
                         <Select.Group>
                           <Select.Label>Currencies</Select.Label>
                           {#each currencyList as currency (currency.code)}
-                            <Select.Item value={currency.code} label={currency.name}>
+                            <Select.Item
+                              value={currency.code}
+                              label={currency.name}
+                            >
                               {currency.code}
                             </Select.Item>
                           {/each}
@@ -100,15 +113,27 @@
   </header>
   <Separator />
 
-  <ul>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
     {#if data.accounts.length === 0}
-      <p class="text-neutral-500 text-center mt-24">
-        No accounts found. Add a new one
-      </p>
+      <div class="col-span-full text-center mt-24">
+        <p class="text-neutral-500">
+          No accounts found. Add a new one
+        </p>
+      </div>
     {:else}
-      {#each data.accounts as account}
-        <li>{account.name}</li>
+      {#each data.accounts as account, index}
+        <Card class="{cardColors[index % cardColors.length]}">
+          <CardHeader>
+            <CardTitle>{account.name}</CardTitle>
+          </CardHeader>
+          <CardContent class="space-y-2">
+            <p class="text-2xl font-bold">
+              {account.currency} {account.balance.toLocaleString()}
+            </p>
+            <p class="text-sm text-neutral-600">Current Balance</p>
+          </CardContent>
+        </Card>
       {/each}
     {/if}
-  </ul>
+  </div>
 </div>

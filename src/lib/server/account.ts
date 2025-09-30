@@ -1,8 +1,36 @@
 import { prisma } from "$lib/db";
 import type { UserAccount } from "@/generated/prisma/client";
 
-export async function getAccounts(): Promise<UserAccount[]> {
-  return await prisma.userAccount.findMany();
+export async function getAccounts(userId: string): Promise<(UserAccount & { balance: number })[]> {
+  const accounts = await prisma.userAccount.findMany({
+    where: { userId }
+  });
+
+  const accountsWithBalance = await Promise.all(
+    accounts.map(async (account) => {
+      const income = await prisma.transaction.aggregate({
+        where: {
+          accountId: account.id,
+          type: 'Income'
+        },
+        _sum: { amount: true }
+      });
+
+      const expense = await prisma.transaction.aggregate({
+        where: {
+          accountId: account.id,
+          type: 'Expense'
+        },
+        _sum: { amount: true }
+      });
+
+      const balance = (income._sum.amount || 0) - (expense._sum.amount || 0);
+
+      return { ...account, balance };
+    })
+  );
+
+  return accountsWithBalance;
 }
 
 export async function createAccount(

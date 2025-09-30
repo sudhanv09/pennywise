@@ -7,9 +7,9 @@ import { accountSchema } from "./schema";
 import { toast } from "svelte-sonner";
 
 
-export const load = (async () => {
+export const load = (async ({ locals }) => {
     const form = await superValidate(valibot(accountSchema));
-    return { accounts: await getAccounts(), form };
+    return { accounts: await getAccounts(locals.user!.id), form };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
