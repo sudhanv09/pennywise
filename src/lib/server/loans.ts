@@ -1,8 +1,10 @@
 import { prisma } from "$lib/db";
 import { type Loan } from "@/generated/prisma/client";
 
-export async function getLoans(): Promise<Loan[]> {
-  return await prisma.loan.findMany();
+export async function getLoans(userId: string): Promise<Loan[]> {
+  return await prisma.loan.findMany({
+    where: { userId }
+  });
 }
 
 export async function createLoan(entry: Omit<Loan, "id">): Promise<Loan> {

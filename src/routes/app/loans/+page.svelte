@@ -6,12 +6,30 @@
   import * as Form from "$lib/components/ui/form/index.js";
   import * as ToggleGroup from "$lib/components/ui/toggle-group/index.js";
 
+  import {
+    DateFormatter,
+    getLocalTimeZone,
+    parseDate,
+    toCalendarDate
+  } from "@internationalized/date";
+  import { cn } from "$lib/utils.js";
+  import { Calendar } from "$lib/components/ui/calendar/index.js";
+  import * as Popover from "$lib/components/ui/popover/index.js";
+
   import Plus from "@lucide/svelte/icons/plus";
   import ArrowLeftRight from "@lucide/svelte/icons/arrow-left-right";
   import Repeat from "@lucide/svelte/icons/repeat";
   import DollarSign from "@lucide/svelte/icons/dollar-sign";
-  import Calendar from "@lucide/svelte/icons/calendar";
+  import CalendarIcon from "@lucide/svelte/icons/calendar";
   import { superForm } from "sveltekit-superforms";
+
+  import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+  } from "@/lib/components/ui/card/index.js";
+  import { Badge } from "$lib/components/ui/badge/index.js";
 
   let { data } = $props();
 
@@ -19,6 +37,42 @@
   const { form, enhance } = superFormObj;
 
   let dialogOpen = $state(false);
+
+  let startDateValue = $state(
+    $form.startDate ? parseDate($form.startDate) : undefined
+  );
+  let endDateValue = $state(
+    $form.endDate ? parseDate($form.endDate).add({ months: 1 }) : undefined
+  );
+
+  $effect(() => {
+    if (startDateValue) {
+      $form.startDate = toCalendarDate(startDateValue).toString();
+    } else {
+      $form.startDate = "";
+    }
+  });
+
+  $effect(() => {
+    if (endDateValue) {
+      $form.endDate = toCalendarDate(endDateValue).toString();
+    } else {
+      $form.endDate = undefined;
+    }
+  });
+
+
+  const df = new DateFormatter("en-US", {
+    dateStyle: "long",
+  });
+
+  const cardColors = [
+    "border-l-2 border-indigo-500",
+    "border-l-2 border-teal-500",
+    "border-l-2 border-amber-500",
+    "border-l-2 border-pink-500",
+    "border-l-2 border-emerald-500",
+  ];
 </script>
 
 <div class="container mx-auto mt-12">
@@ -99,7 +153,7 @@
                         <DollarSign /> One Time
                       </ToggleGroup.Item>
                       <ToggleGroup.Item value="INSTALLMENTS">
-                        <Calendar /> Installments
+                        <CalendarIcon /> Installments
                       </ToggleGroup.Item>
                     </ToggleGroup.Root>
                   {/snippet}
@@ -129,8 +183,7 @@
               <div class="grid grid-cols-4 items-center gap-4">
                 <Form.Control>
                   {#snippet children({ props })}
-                    <Form.Label>Interest Rate (%)</Form.Label
-                    >
+                    <Form.Label>Interest Rate (%)</Form.Label>
                     <Input
                       {...props}
                       class="col-span-3"
@@ -149,34 +202,72 @@
                 <Form.Control>
                   {#snippet children({ props })}
                     <Form.Label>Start Date</Form.Label>
-                    <Input
-                      {...props}
-                      class="col-span-3"
-                      type="date"
-                      bind:value={$form.startDate}
-                    />
+                    <Popover.Root>
+                      <Popover.Trigger
+                        class={cn(
+                          buttonVariants({
+                            variant: "outline",
+                            class:
+                              "col-span-3 justify-start text-left font-normal",
+                          }),
+                          !startDateValue && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon />
+                        {startDateValue
+                          ? df.format(startDateValue.toDate(getLocalTimeZone()))
+                          : "Select a date"}
+                      </Popover.Trigger>
+                      <Popover.Content class="w-auto p-0">
+                        <Calendar
+                          bind:value={startDateValue}
+                          type="single"
+                          initialFocus
+                        />
+                      </Popover.Content>
+                    </Popover.Root>
                   {/snippet}
                 </Form.Control>
               </div>
               <Form.FieldErrors />
             </Form.Field>
 
-            <Form.Field form={superFormObj} name="endDate">
-              <div class="grid grid-cols-4 items-center gap-4">
-                <Form.Control>
-                  {#snippet children({ props })}
-                    <Form.Label>End Date</Form.Label>
-                    <Input
-                      {...props}
-                      class="col-span-3"
-                      type="date"
-                      bind:value={$form.endDate}
-                    />
-                  {/snippet}
-                </Form.Control>
-              </div>
-              <Form.FieldErrors />
-            </Form.Field>
+            {#if $form.repayment === "INSTALLMENTS"}
+              <Form.Field form={superFormObj} name="endDate">
+                <div class="grid grid-cols-4 items-center gap-4">
+                  <Form.Control>
+                    {#snippet children({ props })}
+                      <Form.Label>End Date</Form.Label>
+                      <Popover.Root>
+                        <Popover.Trigger
+                          class={cn(
+                            buttonVariants({
+                              variant: "outline",
+                              class:
+                                "col-span-3 justify-start text-left font-normal",
+                            }),
+                            !endDateValue && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon />
+                          {endDateValue
+                            ? df.format(endDateValue.toDate(getLocalTimeZone()))
+                            : "Select a date"}
+                        </Popover.Trigger>
+                        <Popover.Content class="w-auto p-0">
+                          <Calendar
+                            bind:value={endDateValue}
+                            type="single"
+                            initialFocus
+                          />
+                        </Popover.Content>
+                      </Popover.Root>
+                    {/snippet}
+                  </Form.Control>
+                </div>
+                <Form.FieldErrors />
+              </Form.Field>
+            {/if}
           </div>
           <Dialog.Footer>
             <Form.Button type="submit">Save changes</Form.Button>
@@ -187,15 +278,40 @@
   </header>
   <Separator />
 
-  <ul>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
     {#if data.loans.length === 0}
-      <p class="text-neutral-500 text-center mt-24">
-        No loans found. Add a new one
-      </p>
+      <div class="col-span-full text-center mt-24">
+        <p class="text-neutral-500">No loans found. Add a new one</p>
+      </div>
     {:else}
-      {#each data.loans as loan}
-        <li>{loan.title}</li>
+      {#each data.loans as loan, index}
+        <Card class={cardColors[index % cardColors.length]}>
+          <CardHeader>
+            <CardTitle>{loan.title}</CardTitle>
+            <Badge variant="secondary">{loan.type}</Badge>
+          </CardHeader>
+          <CardContent class="space-y-2">
+            <p class="text-lg font-semibold">
+              Amount: {loan.amount.toLocaleString()}
+            </p>
+            {#if loan.interestRate}
+              <p class="text-sm text-neutral-600">
+                Interest: {loan.interestRate}%
+              </p>
+            {/if}
+            <p class="text-sm text-neutral-600">
+              Repayment: {loan.repayment}
+            </p>
+            <p class="text-sm text-neutral-600">
+              Status: {loan.status}
+            </p>
+            <p class="text-xs text-neutral-500">
+              From {loan.startDate.toLocaleDateString()}
+              {loan.endDate ? `to ${loan.endDate.toLocaleDateString()}` : ""}
+            </p>
+          </CardContent>
+        </Card>
       {/each}
     {/if}
-  </ul>
+  </div>
 </div>
