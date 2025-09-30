@@ -12,6 +12,14 @@
   import * as Form from "$lib/components/ui/form/index.js";
   import { superForm } from "sveltekit-superforms";
 
+  import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+  } from "@/lib/components/ui/card/index.js";
+  import { Progress } from "$lib/components/ui/progress/index.js";
+
   let { data } = $props();
 
   const form = superForm(data.form);
@@ -136,15 +144,30 @@
   </header>
   <Separator />
 
-  <ul>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
     {#if data.goals.length === 0}
-      <p class="text-neutral-500 text-center mt-24">
-        No goals found. Add a new one
-      </p>
+      <div class="col-span-full text-center mt-24">
+        <p class="text-neutral-500">
+          No goals found. Add a new one
+        </p>
+      </div>
     {:else}
       {#each data.goals as goal}
-        <li>{goal.title}</li>
+        <Card>
+          <CardHeader>
+            <CardTitle>{goal.title}</CardTitle>
+          </CardHeader>
+          <CardContent class="space-y-4">
+            <div class="space-y-1">
+              <p class="text-sm text-neutral-600">
+                Target: {goal.targetAmount.toLocaleString()} by {goal.tillDate.toLocaleDateString()}
+              </p>
+            </div>
+            <Progress value={goal.percentage} class="w-full" />
+            <p class="text-xs text-neutral-500">Add {goal.dailyAdd.toFixed(2)} per day</p>
+          </CardContent>
+        </Card>
       {/each}
     {/if}
-  </ul>
+  </div>
 </div>

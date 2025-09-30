@@ -7,14 +7,13 @@ import { goalSchema } from "./schema";
 import { toast } from "svelte-sonner";
 
 
-export const load = (async () => {
+export const load = (async ({ locals }) => {
   const form = await superValidate(valibot(goalSchema));
-  return { goals: await getGoals(), form };
+  return { goals: await getGoals(locals.user!.id), form };
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
-    console.log("got request")
     const form = await superValidate(request, valibot(goalSchema));
 
     if (!form.valid) {
@@ -22,7 +21,6 @@ export const actions: Actions = {
     }
 
     const { title, goalType, targetAmount, currentDate, tillDate } = form.data;
-    console.log(title)
 
     try {
       await createGoal({
