@@ -66,6 +66,7 @@
                         <ChevronDown class="text-red-600"/> Expense
                       </ToggleGroup.Item>
                     </ToggleGroup.Root>
+                    <input type="hidden" name="goalType" value={$formData.goalType}>
                   {/snippet}
                 </Form.Control>
               </div>

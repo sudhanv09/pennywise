@@ -19,29 +19,28 @@ export const actions: Actions = {
     if (!form.valid) {
       return fail(400, { form });
     }
-    console.log(form.data)
 
-    // const { title, amount, interestRate, startDate, endDate, type, repayment } =
-    //   form.data;
+    const { title, amount, interestRate, startDate, endDate, type, repayment } =
+      form.data;
 
-    // try {
-    //   await createLoan({
-    //     title,
-    //     amount,
-    //     interestRate: interestRate || null,
-    //     startDate: new Date(startDate),
-    //     endDate: endDate ? new Date(endDate) : null,
-    //     type,
-    //     repayment,
-    //     status: "ACTIVE",
-    //     userId: locals.user.id,
-    //   });
+    try {
+      await createLoan({
+        title,
+        amount,
+        interestRate: interestRate || null,
+        startDate: new Date(startDate),
+        endDate: endDate ? new Date(endDate) : null,
+        type,
+        repayment,
+        status: "ACTIVE",
+        userId: locals.user.id,
+      });
 
-    //   await invalidateAll();
+      await invalidateAll();
 
-    //   return { form };
-    // } catch (error) {
-    //   return fail(500, { form, error: "Failed to create loan" });
-    // }
+      return { form };
+    } catch (error) {
+      return fail(500, { form, error: "Failed to create loan" });
+    }
   },
 };

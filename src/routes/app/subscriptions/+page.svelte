@@ -105,6 +105,7 @@
                           <TrendingUp /> Yearly
                         </ToggleGroup.Item>
                       </ToggleGroup.Root>
+                      <input type="hidden" name="renewalCycle" value={$form.renewalCycle}>
                     {/snippet}
                   </Form.Control>
                 </div>

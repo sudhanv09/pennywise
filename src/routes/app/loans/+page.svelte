@@ -115,6 +115,7 @@
                         <Repeat /> Lent
                       </ToggleGroup.Item>
                     </ToggleGroup.Root>
+                    <input type="hidden" name="type" value={$form.type}>
                   {/snippet}
                 </Form.Control>
               </div>
@@ -156,6 +157,7 @@
                         <CalendarIcon /> Installments
                       </ToggleGroup.Item>
                     </ToggleGroup.Root>
+                    <input type="hidden" name="repayment" value={$form.repayment}>
                   {/snippet}
                 </Form.Control>
               </div>
