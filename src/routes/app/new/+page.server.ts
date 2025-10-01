@@ -51,7 +51,7 @@ export const actions: Actions = {
         createdDate,
         type,
         userId,
-        accountId: account!,
+        accountId: account || 0, // cash
         categoryId: category,
       });
 

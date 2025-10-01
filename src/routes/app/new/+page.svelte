@@ -62,20 +62,24 @@
         <Form.Control>
           {#snippet children({ props })}
             <Form.Label>Category</Form.Label>
-            <Select.Root
-              type="single"
-              bind:value={$formData.category as string}
-              name={$formData.category as string}
-            >
+            <Select.Root type="single" bind:value={$formData.category as unknown as string}>
               <Select.Trigger {...props}>
-                {$formData.category ? $formData.category : "Select a category"}
+                {#if $formData.category}
+                  {data.categories.find((c) => c.id === $formData.category)
+                    ?.name}
+                {:else}
+                  Select a category
+                {/if}
               </Select.Trigger>
               <Select.Content>
                 {#each data.categories as item}
-                  <Select.Item value={item.name} label={item.name} />
+                  <Select.Item value={item.id as unknown as string} label={item.name}>
+                    {item.name}
+                  </Select.Item>
                 {/each}
               </Select.Content>
             </Select.Root>
+            <input type="hidden" name="category" value={$formData.category} />
           {/snippet}
         </Form.Control>
       </Form.Field>
@@ -127,13 +131,10 @@
             <ToggleGroup.Root
               {...props}
               type="single"
-              bind:value={$formData.account as string}
+              bind:value={$formData.account as unknown as string}
             >
               {#each data.accounts as account}
-                <ToggleGroup.Item
-                  value={account.name}
-                  aria-label={account.name}
-                >
+                <ToggleGroup.Item value={account.id as unknown as string} aria-label={account.name}>
                   {account.name}
                 </ToggleGroup.Item>
               {/each}
