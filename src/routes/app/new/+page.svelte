@@ -2,14 +2,6 @@
   import * as Select from "$lib/components/ui/select/index.js";
   import { Input } from "$lib/components/ui/input";
 
-  import type {
-    Category,
-    Goal,
-    Loan,
-    UserAccount,
-  } from "@/generated/prisma/client";
-  import { TransactionType } from "@/generated/prisma/client";
-
   import ChevronUp from "@lucide/svelte/icons/chevron-up";
   import ChevronDown from "@lucide/svelte/icons/chevron-down";
   import ArrowLeftRight from "@lucide/svelte/icons/arrow-left-right";
@@ -17,24 +9,10 @@
   import * as Form from "$lib/components/ui/form";
   import * as ToggleGroup from "$lib/components/ui/toggle-group/index.js";
   import { TransactionSchema } from "./schema";
-  import {
-    superForm,
-    type Infer,
-    type SuperValidated,
-  } from "sveltekit-superforms";
+  import { superForm } from "sveltekit-superforms";
   import { valibotClient } from "sveltekit-superforms/adapters";
 
-  let {
-    data,
-  }: {
-    data: {
-      form: SuperValidated<Infer<typeof TransactionSchema>>;
-      categories: Category[];
-      goals: Goal[];
-      loans: Loan[];
-      accounts: UserAccount[];
-    };
-  } = $props();
+  let { data } = $props();
 
   const form = superForm(data.form, {
     validators: valibotClient(TransactionSchema),
@@ -58,29 +36,21 @@
             <ToggleGroup.Root
               type="single"
               {...props}
-              bind:value={$formData.type as TransactionType}
+              bind:value={$formData.type}
             >
-              <ToggleGroup.Item
-                value={TransactionType.Expense}
-                aria-label="Expense"
-              >
+              <ToggleGroup.Item value="Expense" aria-label="Expense">
                 <ChevronDown class="size-6" /> Expense
               </ToggleGroup.Item>
               <Separator orientation="vertical" />
-              <ToggleGroup.Item
-                value={TransactionType.Income}
-                aria-label="Income"
-              >
+              <ToggleGroup.Item value="Income" aria-label="Income">
                 <ChevronUp class="size-6" /> Income
               </ToggleGroup.Item>
               <Separator orientation="vertical" />
-              <ToggleGroup.Item
-                value={TransactionType.Transfer}
-                aria-label="Transfer"
-              >
+              <ToggleGroup.Item value="Transfer" aria-label="Transfer">
                 <ArrowLeftRight class="size-6" /> Transfer
               </ToggleGroup.Item>
             </ToggleGroup.Root>
+            <input type="hidden" name="type" value={$formData.type} />
           {/snippet}
         </Form.Control>
       </Form.Field>
@@ -136,7 +106,12 @@
         <Form.Control>
           {#snippet children({ props })}
             <Form.Label>Time</Form.Label>
-            <Input {...props} bind:value={$formData.time} type="time" />
+            <Input
+              {...props}
+              bind:value={$formData.time}
+              step="1"
+              type="time"
+            />
           {/snippet}
         </Form.Control>
         <Form.FieldErrors />
@@ -154,9 +129,6 @@
               type="single"
               bind:value={$formData.account as string}
             >
-              <ToggleGroup.Item value="Cash" aria-label="Cash">
-                Cash
-              </ToggleGroup.Item>
               {#each data.accounts as account}
                 <ToggleGroup.Item
                   value={account.name}
@@ -166,6 +138,7 @@
                 </ToggleGroup.Item>
               {/each}
             </ToggleGroup.Root>
+            <input type="hidden" name="account" value={$formData.account} />
           {/snippet}
         </Form.Control>
       </Form.Field>
@@ -188,6 +161,7 @@
                 </ToggleGroup.Item>
               {/each}
             </ToggleGroup.Root>
+            <input type="hidden" name="goal" value={$formData.goal} />
           {/snippet}
         </Form.Control>
       </Form.Field>
@@ -210,6 +184,7 @@
                 </ToggleGroup.Item>
               {/each}
             </ToggleGroup.Root>
+            <input type="hidden" name="loan" value={$formData.loan} />
           {/snippet}
         </Form.Control>
       </Form.Field>
