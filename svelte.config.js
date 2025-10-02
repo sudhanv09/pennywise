@@ -7,9 +7,12 @@ const config = {
 
   kit: {
     adapter: adapter(),
-	alias: {
-		"@/*": "./src/*"
-	}
+    alias: {
+      "@/*": "./src/*",
+    },
+  },
+  optimizeDeps: {
+    exclude: ["layercake"],
   },
 };
 
