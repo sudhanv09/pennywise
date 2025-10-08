@@ -24,7 +24,9 @@
     TrendingDown,
     Calendar,
     ArrowUpDown,
+    Plus,
   } from "@lucide/svelte";
+  import Fab from "$lib/components/app/fab.svelte";
 
   let { data }: { data: PageData } = $props();
 
@@ -356,3 +358,5 @@
     </Card>
   </div>
 </div>
+
+<Fab href="/app/new" label="Add transaction" icon={Plus} />
