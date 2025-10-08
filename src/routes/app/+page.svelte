@@ -6,6 +6,7 @@
     CardContent,
     CardDescription,
     CardHeader,
+    CardFooter,
   } from "@/lib/components/ui/card";
   import {
     Table,
@@ -17,7 +18,13 @@
   } from "@/lib/components/ui/table";
   import * as Chart from "$lib/components/ui/chart/index.js";
   import { PieChart } from "layerchart";
-  import { Wallet, TrendingUp, TrendingDown, Calendar } from "@lucide/svelte";
+  import {
+    Wallet,
+    TrendingUp,
+    TrendingDown,
+    Calendar,
+    ArrowUpDown,
+  } from "@lucide/svelte";
 
   let { data }: { data: PageData } = $props();
 
@@ -53,6 +60,8 @@
     color: chartColors[index % chartColors.length],
   }));
 
+  const netCashFlow = data.totalIncome - data.totalExpense;
+
   const chartConfig = data.categoryBreakdown.reduce(
     (config, item, index) => {
       const key = item.category.toLowerCase().replace(/\s+/g, "_");
@@ -66,73 +75,202 @@
   );
 </script>
 
-<div class="flex flex-col gap-6 p-6 max-w-7xl mx-auto">
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <Card class="border-2 border-primary/20">
-      <CardHeader
-        class="flex flex-row items-center justify-between space-y-0 pb-2"
-      >
-        <CardTitle class="text-sm font-medium">Total Balance</CardTitle>
-        <Wallet class="h-4 w-4 text-primary" />
-      </CardHeader>
-      <CardContent>
-        <div class="text-2xl font-bold">
-          {formatCurrency(data.totalBalance)}
-        </div>
-        <p class="text-xs text-muted-foreground mt-1">
-          Across {data.accounts.length} account{data.accounts.length !== 1
-            ? "s"
-            : ""}
-        </p>
-      </CardContent>
-    </Card>
-
-    <!-- Expense Card -->
-    <Card class="border-2 border-red-200">
-      <CardHeader
-        class="flex flex-row items-center justify-between space-y-0 pb-2"
-      >
-        <CardTitle class="text-sm font-medium">Total Expenses</CardTitle>
-        <TrendingDown class="h-4 w-4 text-red-600" />
-      </CardHeader>
-      <CardContent>
-        <div class="text-2xl font-bold text-red-600">
-          {formatCurrency(data.totalExpense)}
-        </div>
-        <p class="text-xs text-muted-foreground mt-1">This month</p>
-      </CardContent>
-    </Card>
-
-    <!-- Income Card -->
-    <Card class="border-2 border-green-200">
-      <CardHeader
-        class="flex flex-row items-center justify-between space-y-0 pb-2"
-      >
-        <CardTitle class="text-sm font-medium">Total Income</CardTitle>
-        <TrendingUp class="h-4 w-4 text-green-600" />
-      </CardHeader>
-      <CardContent>
-        <div class="text-2xl font-bold text-green-600">
-          {formatCurrency(data.totalIncome)}
-        </div>
-        <p class="text-xs text-muted-foreground mt-1">This month</p>
-      </CardContent>
-    </Card>
+<div class="flex w-full flex-col gap-6 px-6 pb-10 pt-6">
+  <div class="flex flex-col gap-1">
+    <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">
+      Financial Snapshot
+    </h1>
+    <p class="text-muted-foreground">
+      Understand your balances, cash flow, and spending at a glance.
+    </p>
   </div>
 
-  <!-- Chart and Bank Accounts Section -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Category Breakdown Pie Chart -->
-    <Card class="flex flex-col">
-      <CardHeader class="items-center pb-0">
+  <div
+    class="grid auto-rows-[minmax(180px,auto)] grid-cols-1 gap-6 lg:grid-cols-6 xl:grid-cols-12"
+  >
+    <Card
+      class="border border-primary/30 bg-primary/5 shadow-sm lg:col-span-3 xl:col-span-3"
+    >
+      <CardHeader
+        class="flex flex-row items-start justify-between space-y-0 pb-2"
+      >
+        <div class="space-y-1">
+          <CardTitle class="text-sm font-medium text-primary">
+            Total Balance
+          </CardTitle>
+          <CardDescription class="text-xs">
+            Across {data.accounts.length} account{data.accounts.length !== 1
+              ? "s"
+              : ""}
+          </CardDescription>
+        </div>
+        <div class="rounded-full bg-primary/10 p-2 text-primary">
+          <Wallet class="h-5 w-5" />
+        </div>
+      </CardHeader>
+      <CardContent class="pt-1">
+        <div class="text-3xl font-semibold">
+          {formatCurrency(data.totalBalance)}
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card
+      class="border border-red-200 bg-red-50/80 shadow-sm dark:border-red-900/40 dark:bg-red-950/30 lg:col-span-3 xl:col-span-3"
+    >
+      <CardHeader
+        class="flex flex-row items-start justify-between space-y-0 pb-2"
+      >
+        <div class="space-y-1">
+          <CardTitle class="text-sm font-medium text-red-600 dark:text-red-400">
+            Total Expenses
+          </CardTitle>
+          <CardDescription class="text-xs">This month</CardDescription>
+        </div>
+        <div
+          class="rounded-full bg-red-100 p-2 text-red-600 dark:bg-red-900/40 dark:text-red-400"
+        >
+          <TrendingDown class="h-5 w-5" />
+        </div>
+      </CardHeader>
+      <CardContent class="pt-1">
+        <div class="text-3xl font-semibold text-red-600 dark:text-red-400">
+          {formatCurrency(data.totalExpense)}
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card
+      class="border border-emerald-200 bg-emerald-50/70 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 lg:col-span-3 xl:col-span-3"
+    >
+      <CardHeader
+        class="flex flex-row items-start justify-between space-y-0 pb-2"
+      >
+        <div class="space-y-1">
+          <CardTitle class="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+            Total Income
+          </CardTitle>
+          <CardDescription class="text-xs">This month</CardDescription>
+        </div>
+        <div
+          class="rounded-full bg-emerald-100 p-2 text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400"
+        >
+          <TrendingUp class="h-5 w-5" />
+        </div>
+      </CardHeader>
+      <CardContent class="pt-1">
+        <div class="text-3xl font-semibold text-emerald-600 dark:text-emerald-400">
+          {formatCurrency(data.totalIncome)}
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card
+      class="border border-muted-foreground/20 bg-card shadow-sm lg:col-span-3 xl:col-span-3"
+    >
+      <CardHeader
+        class="flex flex-row items-start justify-between space-y-0 pb-2"
+      >
+        <div class="space-y-1">
+          <CardTitle class="text-sm font-medium">Net Cash Flow</CardTitle>
+          <CardDescription class="text-xs">
+            Income minus expenses
+          </CardDescription>
+        </div>
+        <div class="rounded-full bg-muted/60 p-2 text-muted-foreground">
+          <ArrowUpDown class="h-5 w-5" />
+        </div>
+      </CardHeader>
+      <CardContent class="pt-1">
+        <div
+          class="text-3xl font-semibold {netCashFlow >= 0
+            ? 'text-emerald-600'
+            : 'text-rose-500'}"
+        >
+          {netCashFlow >= 0 ? "+" : "-"}
+          {formatCurrency(Math.abs(netCashFlow))}
+        </div>
+      </CardContent>
+    </Card>
+
+    <Card class="flex flex-col lg:col-span-4 lg:row-span-2 xl:col-span-6">
+      <CardHeader class="space-y-1 pb-0">
+        <CardTitle>Recent Transactions</CardTitle>
+        <CardDescription>Grouped by posting date.</CardDescription>
+      </CardHeader>
+      <CardContent class="flex-1 overflow-hidden p-0">
+        {#if data.transactionsByDate.length > 0}
+          <div class="flex h-full flex-col">
+            <div class="flex-1 overflow-y-auto">
+              {#each data.transactionsByDate as dateGroup}
+                <div class="border-b last:border-b-0">
+                  <div class="flex items-center gap-2 bg-muted/70 px-6 py-3">
+                    <Calendar class="h-4 w-4 text-muted-foreground" />
+                    <span class="text-sm font-semibold">
+                      {formatDate(dateGroup.date)}
+                    </span>
+                  </div>
+                  <div class="overflow-x-auto px-6 py-3">
+                    <Table class="w-full min-w-[480px]">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead class="w-[200px]">Category</TableHead>
+                          <TableHead>Title</TableHead>
+                          <TableHead class="w-[150px] text-right">
+                            Amount
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {#each dateGroup.transactions as transaction}
+                          <TableRow>
+                            <TableCell class="font-medium">
+                              {transaction.category}
+                            </TableCell>
+                            <TableCell>{transaction.title}</TableCell>
+                            <TableCell
+                              class="text-right font-semibold {transaction.type ===
+                              'Expense'
+                                ? 'text-red-600'
+                                : transaction.type === 'Income'
+                                  ? 'text-green-600'
+                                  : 'text-blue-600'}"
+                            >
+                              {transaction.type === "Expense" ? "-" : "+"}
+                              {formatCurrency(transaction.amount)}
+                            </TableCell>
+                          </TableRow>
+                        {/each}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          </div>
+        {:else}
+          <div class="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">
+            <div class="text-center">
+              <p class="text-base font-medium">No transactions yet</p>
+              <p class="text-sm">Start by adding your first transaction.</p>
+            </div>
+          </div>
+        {/if}
+      </CardContent>
+    </Card>
+
+    <Card
+      class="flex flex-col lg:col-span-2 lg:col-start-5 xl:col-span-3 xl:col-start-7"
+    >
+      <CardHeader class="space-y-1 pb-0">
         <CardTitle>Spending by Category</CardTitle>
-        <CardDescription>Category-wise expense breakdown</CardDescription>
+        <CardDescription>Track where your expenses concentrate.</CardDescription>
       </CardHeader>
       <CardContent class="flex-1 pb-0">
         {#if chartData.length > 0}
           <Chart.Container
             config={chartConfig}
-            class="mx-auto aspect-square max-h-[300px]"
+            class="mx-auto aspect-square w-full max-w-[280px]"
           >
             <PieChart
               data={chartData}
@@ -149,133 +287,72 @@
             </PieChart>
           </Chart.Container>
         {:else}
-          <div
-            class="flex items-center justify-center h-[300px] text-muted-foreground"
-          >
-            No expense data available
+          <div class="flex h-full items-center justify-center text-sm text-muted-foreground">
+            No expense data available yet.
           </div>
         {/if}
       </CardContent>
-      <CardContent class="flex-col gap-2 text-sm pt-4">
-        {#each data.categoryBreakdown as item, index}
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div
-                class="w-3 h-3 rounded-full"
-                style="background-color: {chartColors[
-                  index % chartColors.length
-                ]}"
-              ></div>
-              <span>{item.category}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="font-medium">{formatCurrency(item.amount)}</span>
-              <span class="text-muted-foreground">
-                ({item.percentage.toFixed(1)}%)
-              </span>
-            </div>
-          </div>
-        {/each}
-      </CardContent>
-    </Card>
-
-    <!-- Bank Accounts -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Bank Accounts</CardTitle>
-        <CardDescription>Current balances across accounts</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-4">
-          {#each data.accounts as account}
+      {#if chartData.length > 0}
+        <CardFooter class="flex flex-col gap-2 pt-4 text-sm">
+          {#each data.categoryBreakdown as item, index}
             <div class="flex items-center justify-between">
-              <div>
-                <div class="font-medium">{account.name}</div>
-                <div class="text-sm text-muted-foreground">
-                  {account.currency}
-                </div>
+              <div class="flex items-center gap-2">
+                <div
+                  class="h-3 w-3 rounded-full"
+                  style="background-color: {chartColors[
+                    index % chartColors.length
+                  ]}"
+                ></div>
+                <span>{item.category}</span>
               </div>
-              <div
-                class="text-lg font-bold {account.balance >= 0
-                  ? 'text-green-600'
-                  : 'text-red-600'}"
-              >
-                {formatCurrency(account.balance)}
+              <div class="flex items-center gap-2">
+                <span class="font-medium">{formatCurrency(item.amount)}</span>
+                <span class="text-muted-foreground">
+                  ({item.percentage.toFixed(1)}%)
+                </span>
               </div>
             </div>
           {/each}
-          {#if data.accounts.length === 0}
-            <div class="text-center text-muted-foreground py-8">
-              No accounts found
+        </CardFooter>
+      {/if}
+    </Card>
+
+    <Card
+      class="flex flex-col lg:col-span-2 lg:col-start-5 xl:col-span-3 xl:col-start-7"
+    >
+      <CardHeader class="space-y-1 pb-0">
+        <CardTitle>Bank Accounts</CardTitle>
+        <CardDescription>Live balances across your accounts.</CardDescription>
+      </CardHeader>
+      <CardContent class="flex-1 pt-4">
+        {#if data.accounts.length > 0}
+          <div class="max-h-[320px] overflow-y-auto pr-1">
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {#each data.accounts as account}
+                <div class="rounded-lg border border-border/60 bg-muted/40 p-3">
+                  <div class="flex items-center justify-between text-sm font-medium">
+                    <span class="truncate">{account.name}</span>
+                    <span class="text-xs uppercase text-muted-foreground">
+                      {account.currency}
+                    </span>
+                  </div>
+                  <div
+                    class="mt-2 text-lg font-semibold {account.balance >= 0
+                      ? 'text-emerald-600'
+                      : 'text-rose-500'}"
+                  >
+                    {formatCurrency(account.balance)}
+                  </div>
+                </div>
+              {/each}
             </div>
-          {/if}
-        </div>
+          </div>
+        {:else}
+          <div class="flex h-full items-center justify-center rounded-lg border border-dashed border-muted-foreground/40 p-6 text-sm text-muted-foreground">
+            You don&apos;t have any accounts yet.
+          </div>
+        {/if}
       </CardContent>
     </Card>
   </div>
-</div>
-
-<!-- Recent Transactions Table - Full Width -->
-<div class="px-6 pb-6 max-w-7xl mx-auto">
-  <div class="mb-4">
-    <h2 class="text-2xl font-bold tracking-tight">Recent Transactions</h2>
-    <p class="text-muted-foreground">Transactions grouped by date</p>
-  </div>
-
-  {#if data.transactionsByDate.length > 0}
-    <div class="space-y-6">
-      {#each data.transactionsByDate as dateGroup}
-        <div>
-          <!-- Date Header -->
-          <div
-            class="flex items-center gap-2 mb-3 px-2 py-2 bg-muted/50 rounded-lg"
-          >
-            <Calendar class="h-4 w-4 text-muted-foreground" />
-            <span class="text-sm font-semibold"
-              >{formatDate(dateGroup.date)}</span
-            >
-          </div>
-
-          <!-- Transactions Table -->
-          <div class="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead class="w-[200px]">Category</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead class="text-right w-[150px]">Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {#each dateGroup.transactions as transaction}
-                  <TableRow>
-                    <TableCell class="font-medium">
-                      {transaction.category}
-                    </TableCell>
-                    <TableCell>{transaction.title}</TableCell>
-                    <TableCell
-                      class="text-right font-semibold {transaction.type ===
-                      'Expense'
-                        ? 'text-red-600'
-                        : transaction.type === 'Income'
-                          ? 'text-green-600'
-                          : 'text-blue-600'}"
-                    >
-                      {transaction.type === "Expense" ? "-" : "+"}
-                      {formatCurrency(transaction.amount)}
-                    </TableCell>
-                  </TableRow>
-                {/each}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      {/each}
-    </div>
-  {:else}
-    <div class="text-center py-12 text-muted-foreground border rounded-lg">
-      <p class="text-lg font-medium">No transactions yet</p>
-      <p class="text-sm mt-1">Start by adding your first transaction</p>
-    </div>
-  {/if}
 </div>
