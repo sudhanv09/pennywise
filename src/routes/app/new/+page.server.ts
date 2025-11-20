@@ -42,7 +42,7 @@ export const actions: Actions = {
     const userId = event.locals.user.id;
 
     try {
-      const createdDate = new Date(`${date}${time}`);
+      const createdDate = new Date(`${date}T${time}`);
 
       await createTransaction({
         title,
