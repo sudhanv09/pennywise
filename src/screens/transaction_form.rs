@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use chrono::Local;
+use chrono::{Local, NaiveDate};
 use crate::db::DbConnection;
 use crate::models::model::{Account, Category, TransactionType, Transactions};
 use crate::repository::{accounts as acct_repo, categories as cat_repo, transactions as tx_repo};
@@ -27,6 +27,7 @@ fn TransactionForm(id: Option<i32>) -> Element {
     let mut selected_tags: Signal<Vec<usize>> = use_signal(Vec::new);
     let mut note          = use_signal(String::new);
     let mut cat_drawer    = use_signal(|| false);
+    let mut tx_date       = use_signal(|| Local::now().date_naive());
 
     let mut categories: Signal<Vec<Category>> = use_signal(Vec::new);
     let mut accounts:   Signal<Vec<Account>>  = use_signal(Vec::new);
@@ -56,6 +57,7 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     selected_cat_id.set(tx.category as i32);
                     selected_acct_id.set(tx.account as i32);
                     note.set(if tx.title.is_empty() { tx.description } else { tx.title });
+                    tx_date.set(tx.tx_date);
                 }
             }
 
@@ -89,7 +91,16 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 span { class: "txform-title",
                     { if is_edit { "EDIT ENTRY" } else { "NEW ENTRY" } }
                 }
-                button { class: "txform-date-pill", "📅  TODAY  ▾" }
+                input {
+                    class: "txform-date-pill",
+                    r#type: "date",
+                    value: "{tx_date.read().format(\"%Y-%m-%d\")}",
+                    oninput: move |e| {
+                        if let Ok(d) = NaiveDate::parse_from_str(&e.value(), "%Y-%m-%d") {
+                            tx_date.set(d);
+                        }
+                    },
+                }
             }
 
             div {
@@ -198,15 +209,14 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     onclick: {
                         let db = db.clone();
                         move |_| {
-                            let now      = Local::now();
                             let amt: f32 = amount.read().parse().unwrap_or(0.0);
                             let title    = note.read().clone();
                             let tx = Transactions {
                                 id:          id.unwrap_or(0),
                                 title:       title.clone(),
                                 amount:      amt,
-                                tx_date:     now.date_naive(),
-                                tx_time:     now.time(),
+                                tx_date:     *tx_date.read(),
+                                tx_time:     Local::now().time(),
                                 tx_type:     tx_type.read().clone(),
                                 category:    *selected_cat_id.read() as i16,
                                 account:     *selected_acct_id.read() as i16,
