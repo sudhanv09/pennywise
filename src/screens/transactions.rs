@@ -1,19 +1,19 @@
 use dioxus::prelude::*;
 use chrono::{Local, Datelike};
+use crate::db::DbConnection;
+use crate::models::model::TransactionType;
+use crate::repository::transactions as tx_repo;
 use crate::Route;
 
-#[derive(Clone, PartialEq)]
-struct MockTx {
-    title:  &'static str,
-    amount: f32,
-    icon:   &'static str,
-}
+// Category icon lookup — index matches what is stored in the DB
+const CATEGORIES: &[(&str, &str)] = &[
+    ("🍔", "FOOD"),  ("🚌", "TRANSPORT"), ("🛍", "SHOPPING"),
+    ("💊", "HEALTH"), ("🎬", "ENTERTAIN"), ("🏠", "HOUSING"),
+    ("✈️", "TRAVEL"), ("📚", "EDUCATION"),  ("🎁", "GIFTS"),
+];
 
-#[derive(Clone, PartialEq)]
-struct DayGroup {
-    date_label:  String,
-    daily_total: f32,
-    items:       Vec<MockTx>,
+fn category_icon(idx: i16) -> &'static str {
+    CATEGORIES.get(idx as usize).map(|(icon, _)| *icon).unwrap_or("💸")
 }
 
 fn month_name(m: u32) -> &'static str {
@@ -24,45 +24,6 @@ fn month_name(m: u32) -> &'static str {
     }
 }
 
-fn mock_groups(month: u32, year: i32) -> Vec<DayGroup> {
-    let mn = month_name(month);
-    vec![
-        DayGroup {
-            date_label: format!("{mn} 15, {year}"),
-            daily_total: -42.50,
-            items: vec![
-                MockTx { title: "Uber Rides",         amount: -12.50, icon: "🚌" },
-                MockTx { title: "Starbucks Coffee",   amount:  -4.50, icon: "☕" },
-                MockTx { title: "Groceries",          amount: -25.50, icon: "🛍" },
-            ],
-        },
-        DayGroup {
-            date_label: format!("{mn} 12, {year}"),
-            daily_total: 1200.0,
-            items: vec![
-                MockTx { title: "Freelance Inc.",     amount: 1200.0, icon: "💼" },
-            ],
-        },
-        DayGroup {
-            date_label: format!("{mn} 8, {year}"),
-            daily_total: -189.99,
-            items: vec![
-                MockTx { title: "Netflix",            amount: -15.99, icon: "🎬" },
-                MockTx { title: "Electric Bill",      amount: -74.00, icon: "⚡" },
-                MockTx { title: "Spotify",            amount: -9.99,  icon: "🎵" },
-                MockTx { title: "Phone Bill",         amount: -90.01, icon: "📱" },
-            ],
-        },
-        DayGroup {
-            date_label: format!("{mn} 1, {year}"),
-            daily_total: -1200.0,
-            items: vec![
-                MockTx { title: "Rent",               amount: -1200.0, icon: "🏠" },
-            ],
-        },
-    ]
-}
-
 fn prev_month(m: u32, y: i32) -> (u32, i32) {
     if m == 1 { (12, y - 1) } else { (m - 1, y) }
 }
@@ -70,40 +31,77 @@ fn next_month(m: u32, y: i32) -> (u32, i32) {
     if m == 12 { (1, y + 1) } else { (m + 1, y) }
 }
 
+#[derive(Clone, PartialEq)]
+struct TxRow {
+    id:        i32,
+    title:     String,
+    amount:    f32,
+    icon:      &'static str,
+    is_income: bool,
+}
+
+#[derive(Clone, PartialEq)]
+struct DayGroup {
+    date_label:  String,
+    daily_total: f32,
+    items:       Vec<TxRow>,
+}
+
+fn build_groups(month: u32, year: i32, db: &DbConnection) -> Vec<DayGroup> {
+    let txs = tx_repo::get_by_month(db, month, year).unwrap_or_default();
+
+    // Group by date (txs are already ordered DESC by date+time)
+    let mut groups: Vec<DayGroup> = Vec::new();
+    for tx in txs {
+        let label = tx.tx_date.format("%b %-d, %Y").to_string().to_uppercase();
+        let row = TxRow {
+            id:        tx.id,
+            title:     if tx.title.is_empty() { tx.description.clone() } else { tx.title.clone() },
+            amount:    tx.amount,
+            icon:      category_icon(tx.category),
+            is_income: tx.tx_type == TransactionType::Income,
+        };
+        if let Some(g) = groups.last_mut().filter(|g| g.date_label == label) {
+            g.daily_total += tx.amount;
+            g.items.push(row);
+        } else {
+            groups.push(DayGroup { date_label: label, daily_total: tx.amount, items: vec![row] });
+        }
+    }
+    groups
+}
+
 #[component]
 pub fn Transactions() -> Element {
+    let db  = use_context::<DbConnection>();
     let now = Local::now();
     let mut sel_month = use_signal(|| now.month());
     let mut sel_year  = use_signal(|| now.year());
-
     let nav = use_navigator();
 
-    let groups = use_memo(move || mock_groups(*sel_month.read(), *sel_year.read()));
+    let groups = use_memo(move || build_groups(*sel_month.read(), *sel_year.read(), &db));
 
     let mtd_total: f32 = groups.read().iter()
-        .flat_map(|g| g.items.iter())
-        .map(|t| t.amount)
+        .map(|g| g.daily_total)
         .sum();
 
-    // Build a window of 5 months to show in the tab strip
-    let month_window: Vec<(u32, i32)> = {
+    let month_window = {
         let m = *sel_month.read();
         let y = *sel_year.read();
-        let (pm1, py1) = prev_month(m, y);
-        let (nm1, ny1) = next_month(m, y);
-        vec![(pm1, py1), (m, y), (nm1, ny1)]
+        let (pm, py) = prev_month(m, y);
+        let (nm, ny) = next_month(m, y);
+        vec![(pm, py), (m, y), (nm, ny)]
     };
 
-    let mtd_sign   = if mtd_total >= 0.0 { "+" } else { "" };
-    let mtd_class  = if mtd_total >= 0.0 { "mtd-total mtd-total--pos" } else { "mtd-total mtd-total--neg" };
-    let cur_mn     = month_name(*sel_month.read());
-    let cur_yr     = *sel_year.read();
+    let mtd_class = if mtd_total >= 0.0 { "mtd-total mtd-total--pos" } else { "mtd-total mtd-total--neg" };
+    let mtd_sign  = if mtd_total >= 0.0 { "+" } else { "" };
+    let cur_mn    = month_name(*sel_month.read());
+    let cur_yr    = *sel_year.read();
 
     rsx! {
         div {
             class: "ledger-screen",
 
-            // ── Header ──────────────────────────────────────
             div {
                 class: "ledger-header",
                 h1 { class: "ledger-title", "THE LEDGER" }
@@ -134,8 +132,13 @@ pub fn Transactions() -> Element {
 
             div {
                 class: "tx-list",
+                if groups.read().is_empty() {
+                    div {
+                        class: "tx-empty",
+                        p { "No transactions this month" }
+                    }
+                }
                 for group in groups.read().iter() {
-                    // Date header
                     div {
                         class: "day-header",
                         span { class: "day-date", "{group.date_label}" }
@@ -148,17 +151,19 @@ pub fn Transactions() -> Element {
                             }}
                         }
                     }
-                    // Transactions
                     for tx in group.items.iter() {
                         div {
                             class: "tx-row",
-                            onclick: move |_| { nav.push(Route::AddTransaction); },
+                            onclick: {
+                                let id = tx.id;
+                                move |_| { nav.push(Route::EditTransaction { id }); }
+                            },
                             div { class: "tx-icon", "{tx.icon}" }
                             span { class: "tx-title", "{tx.title}" }
                             span { class: "tx-dots" }
                             span {
-                                class: if tx.amount >= 0.0 { "tx-amount tx-amount--pos" } else { "tx-amount" },
-                                { if tx.amount >= 0.0 {
+                                class: if tx.is_income { "tx-amount tx-amount--pos" } else { "tx-amount" },
+                                { if tx.is_income {
                                     format!("+{:.2}", tx.amount)
                                 } else {
                                     format!("({:.2})", tx.amount.abs())

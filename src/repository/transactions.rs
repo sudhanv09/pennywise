@@ -110,6 +110,36 @@ pub fn update(db: &DbConnection, tx: &Transactions) -> Result<()> {
     Ok(())
 }
 
+pub fn get_by_month(db: &DbConnection, month: u32, year: i32) -> Result<Vec<Transactions>> {
+    let conn = db.lock().unwrap();
+    let mut stmt = conn.prepare(
+        "SELECT id, title, amount, tx_date, tx_time, tx_type, category, account, description
+         FROM transactions
+         WHERE strftime('%Y', tx_date) = ?1 AND strftime('%m', tx_date) = ?2
+         ORDER BY tx_date DESC, tx_time DESC",
+    )?;
+    let rows = stmt.query_map(
+        rusqlite::params![format!("{year:04}"), format!("{month:02}")],
+        |row| {
+            let date_str: String = row.get(3)?;
+            let time_str: String = row.get(4)?;
+            let type_str: String = row.get(5)?;
+            Ok(Transactions {
+                id: row.get(0)?,
+                title: row.get(1)?,
+                amount: row.get::<_, f64>(2)? as f32,
+                tx_date: NaiveDate::parse_from_str(&date_str, "%Y-%m-%d").unwrap_or_default(),
+                tx_time: NaiveTime::parse_from_str(&time_str, "%H:%M:%S").unwrap_or_default(),
+                tx_type: tx_type_from_str(&type_str),
+                category: row.get(6)?,
+                account: row.get(7)?,
+                description: row.get(8)?,
+            })
+        },
+    )?;
+    rows.collect()
+}
+
 pub fn delete(db: &DbConnection, id: i32) -> Result<()> {
     let conn = db.lock().unwrap();
     conn.execute("DELETE FROM transactions WHERE id = ?1", [id])?;

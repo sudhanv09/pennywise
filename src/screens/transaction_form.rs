@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
-use crate::models::model::TransactionType;
+use chrono::Local;
+use crate::db::DbConnection;
+use crate::models::model::{TransactionType, Transactions};
+use crate::repository::transactions as tx_repo;
 
 #[component]
 pub fn AddTransaction() -> Element {
@@ -11,16 +14,20 @@ pub fn EditTransaction(id: i32) -> Element {
     rsx! { TransactionForm { id: Some(id) } }
 }
 
-const ACCOUNTS: &[&str]           = &["AMEX *1002", "BANK ACCOUNT", "CASH"];
-const CATEGORIES: &[(&str, &str)] = &[
+pub const CATEGORIES: &[(&str, &str)] = &[
     ("🍔", "FOOD"),  ("🚌", "TRANSPORT"), ("🛍", "SHOPPING"),
     ("💊", "HEALTH"), ("🎬", "ENTERTAIN"), ("🏠", "HOUSING"),
     ("✈️", "TRAVEL"), ("📚", "EDUCATION"),  ("🎁", "GIFTS"),
 ];
 const TAGS: &[&str] = &["LOAN", "GOAL", "SAVINGS", "RECURRING"];
 
+// Placeholder accounts until accounts screen is built
+const ACCOUNTS: &[&str] = &["ACCOUNT 1", "ACCOUNT 2", "CASH"];
+
 #[component]
 fn TransactionForm(id: Option<i32>) -> Element {
+    let db = use_context::<DbConnection>();
+
     let mut amount        = use_signal(|| String::from("0.00"));
     let mut tx_type       = use_signal(|| TransactionType::Expense);
     let mut selected_acct = use_signal(|| 0usize);
@@ -32,14 +39,28 @@ fn TransactionForm(id: Option<i32>) -> Element {
     let is_edit = id.is_some();
     let nav     = use_navigator();
 
+    // Pre-populate form when editing
+    {
+        let db = db.clone();
+        use_effect(move || {
+            if let Some(edit_id) = id {
+                if let Ok(tx) = tx_repo::get_by_id(&db, edit_id) {
+                    amount.set(format!("{:.2}", tx.amount.abs()));
+                    tx_type.set(tx.tx_type);
+                    selected_cat.set(tx.category as usize);
+                    selected_acct.set(tx.account as usize);
+                    note.set(if tx.title.is_empty() { tx.description } else { tx.title });
+                }
+            }
+        });
+    }
+
     let (cat_icon, cat_label) = CATEGORIES[*selected_cat.read()];
 
     rsx! {
-        // ── Main form ──────────────────────────────────────
         div {
             class: "txform",
 
-            // Header
             div {
                 class: "txform-header",
                 button {
@@ -53,7 +74,6 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 button { class: "txform-date-pill", "📅  TODAY  ▾" }
             }
 
-            // Amount hero — category pill lives here
             div {
                 class: "txform-hero",
 
@@ -90,7 +110,6 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     }
                 }
 
-                // Meta row: USD info + category pill side by side
                 div {
                     class: "txform-meta-row",
                     span { class: "txform-meta", "USD  •  PERSONAL" }
@@ -104,7 +123,6 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 }
             }
 
-            // Account
             div {
                 class: "txform-section",
                 p { class: "txform-section-label", "ACCOUNT" }
@@ -120,7 +138,6 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 }
             }
 
-            // Tags
             div {
                 class: "txform-section",
                 p { class: "txform-section-label", "TAGS" }
@@ -140,7 +157,6 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 }
             }
 
-            // Note
             div {
                 class: "txform-section",
                 input {
@@ -152,18 +168,40 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 }
             }
 
-            // Submit
             div {
                 class: "txform-footer",
                 button {
                     class: "txform-submit",
-                    onclick: move |_| { nav.go_back(); },
+                    onclick: {
+                        let db = db.clone();
+                        move |_| {
+                            let now        = Local::now();
+                            let amt: f32   = amount.read().parse().unwrap_or(0.0);
+                            let title      = note.read().clone();
+                            let tx = Transactions {
+                                id:          id.unwrap_or(0),
+                                title:       title.clone(),
+                                amount:      amt,
+                                tx_date:     now.date_naive(),
+                                tx_time:     now.time(),
+                                tx_type:     tx_type.read().clone(),
+                                category:    *selected_cat.read() as i16,
+                                account:     *selected_acct.read() as i16,
+                                description: title,
+                            };
+                            if is_edit {
+                                let _ = tx_repo::update(&db, &tx);
+                            } else {
+                                let _ = tx_repo::insert(&db, &tx);
+                            }
+                            nav.go_back();
+                        }
+                    },
                     "Save"
                 }
             }
         }
 
-        // ── Category drawer ────────────────────────────────
         div {
             class: if *cat_drawer.read() { "drawer-backdrop visible" } else { "drawer-backdrop" },
             onclick: move |_| cat_drawer.set(false),
@@ -171,12 +209,8 @@ fn TransactionForm(id: Option<i32>) -> Element {
 
         div {
             class: if *cat_drawer.read() { "cat-drawer open" } else { "cat-drawer" },
-
-            // Handle
             div { class: "drawer-handle" }
-
             p { class: "drawer-title", "CATEGORY" }
-
             div {
                 class: "cat-grid",
                 for (i, (icon, label)) in CATEGORIES.iter().enumerate() {
