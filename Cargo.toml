@@ -8,8 +8,8 @@ edition = "2021"
 
 [dependencies]
 chrono = "0.4.44"
-dioxus = { version = "0.7.1", features = [] }
-rusqlite = "0.38.0"
+dioxus = { version = "0.7.1", features = ["router"] }
+rusqlite = { version = "0.38.0", features = ["bundled"] }
 
 [features]
 default = ["mobile"]

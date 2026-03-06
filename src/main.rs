@@ -1,11 +1,45 @@
 use dioxus::prelude::*;
 
 mod components;
+mod db;
+mod models;
+mod repository;
+mod screens;
+
 use components::app_dock::AppDock;
+use screens::{
+    home::Home,
+    settings::Settings,
+    transaction_form::{AddTransaction, EditTransaction},
+    transactions::Transactions,
+};
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
-const HEADER_SVG: Asset = asset!("/assets/header.svg");
+
+#[derive(Clone, Routable, PartialEq, Debug)]
+enum Route {
+    #[layout(AppLayout)]
+        #[route("/")]
+        Home,
+        #[route("/settings")]
+        Settings,
+        #[route("/transactions")]
+        Transactions,
+    #[end_layout]
+    #[route("/transaction/new")]
+    AddTransaction,
+    #[route("/transaction/:id/edit")]
+    EditTransaction { id: i32 },
+}
+
+#[component]
+fn AppLayout() -> Element {
+    rsx! {
+        Outlet::<Route> {}
+        AppDock {}
+    }
+}
 
 fn main() {
     dioxus::launch(App);
@@ -16,6 +50,6 @@ fn App() -> Element {
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
-        AppDock {  }
+        Router::<Route> {}
     }
 }
