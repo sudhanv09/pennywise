@@ -5,15 +5,14 @@ use crate::models::model::TransactionType;
 use crate::repository::transactions as tx_repo;
 use crate::Route;
 
-// Category icon lookup — index matches what is stored in the DB
-const CATEGORIES: &[(&str, &str)] = &[
-    ("🍔", "FOOD"),  ("🚌", "TRANSPORT"), ("🛍", "SHOPPING"),
-    ("💊", "HEALTH"), ("🎬", "ENTERTAIN"), ("🏠", "HOUSING"),
-    ("✈️", "TRAVEL"), ("📚", "EDUCATION"),  ("🎁", "GIFTS"),
+// Category icons seeded in order; DB ids are 1-based so id-1 = array index.
+const CATEGORY_ICONS: &[&str] = &[
+    "🍔", "🚌", "🛍", "💊", "🎬", "🏠", "✈️", "📚", "🎁",
 ];
 
-fn category_icon(idx: i16) -> &'static str {
-    CATEGORIES.get(idx as usize).map(|(icon, _)| *icon).unwrap_or("💸")
+fn category_icon(id: i16) -> &'static str {
+    let idx = (id as usize).saturating_sub(1);
+    CATEGORY_ICONS.get(idx).copied().unwrap_or("💸")
 }
 
 fn month_name(m: u32) -> &'static str {

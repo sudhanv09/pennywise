@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 use chrono::Local;
 use crate::db::DbConnection;
-use crate::models::model::{TransactionType, Transactions};
-use crate::repository::transactions as tx_repo;
+use crate::models::model::{Account, Category, TransactionType, Transactions};
+use crate::repository::{accounts as acct_repo, categories as cat_repo, transactions as tx_repo};
 
 #[component]
 pub fn AddTransaction() -> Element {
@@ -14,15 +14,7 @@ pub fn EditTransaction(id: i32) -> Element {
     rsx! { TransactionForm { id: Some(id) } }
 }
 
-pub const CATEGORIES: &[(&str, &str)] = &[
-    ("🍔", "FOOD"),  ("🚌", "TRANSPORT"), ("🛍", "SHOPPING"),
-    ("💊", "HEALTH"), ("🎬", "ENTERTAIN"), ("🏠", "HOUSING"),
-    ("✈️", "TRAVEL"), ("📚", "EDUCATION"),  ("🎁", "GIFTS"),
-];
 const TAGS: &[&str] = &["LOAN", "GOAL", "SAVINGS", "RECURRING"];
-
-// Placeholder accounts until accounts screen is built
-const ACCOUNTS: &[&str] = &["ACCOUNT 1", "ACCOUNT 2", "CASH"];
 
 #[component]
 fn TransactionForm(id: Option<i32>) -> Element {
@@ -30,32 +22,58 @@ fn TransactionForm(id: Option<i32>) -> Element {
 
     let mut amount        = use_signal(|| String::from("0.00"));
     let mut tx_type       = use_signal(|| TransactionType::Expense);
-    let mut selected_acct = use_signal(|| 0usize);
-    let mut selected_cat  = use_signal(|| 0usize);
+    let mut selected_cat_id:  Signal<i32> = use_signal(|| 0);
+    let mut selected_acct_id: Signal<i32> = use_signal(|| 0);
     let mut selected_tags: Signal<Vec<usize>> = use_signal(Vec::new);
     let mut note          = use_signal(String::new);
     let mut cat_drawer    = use_signal(|| false);
 
+    let mut categories: Signal<Vec<Category>> = use_signal(Vec::new);
+    let mut accounts:   Signal<Vec<Account>>  = use_signal(Vec::new);
+
     let is_edit = id.is_some();
     let nav     = use_navigator();
 
-    // Pre-populate form when editing
     {
         let db = db.clone();
         use_effect(move || {
+            let loaded_cats  = cat_repo::get_all(&db).unwrap_or_default();
+            let loaded_accts = acct_repo::get_all(&db).unwrap_or_default();
+
+            // Set defaults from first items
+            if !loaded_cats.is_empty() && *selected_cat_id.read() == 0 {
+                selected_cat_id.set(loaded_cats[0].id);
+            }
+            if !loaded_accts.is_empty() && *selected_acct_id.read() == 0 {
+                selected_acct_id.set(loaded_accts[0].id);
+            }
+
+            // Pre-populate for edit (overrides defaults)
             if let Some(edit_id) = id {
                 if let Ok(tx) = tx_repo::get_by_id(&db, edit_id) {
                     amount.set(format!("{:.2}", tx.amount.abs()));
                     tx_type.set(tx.tx_type);
-                    selected_cat.set(tx.category as usize);
-                    selected_acct.set(tx.account as usize);
+                    selected_cat_id.set(tx.category as i32);
+                    selected_acct_id.set(tx.account as i32);
                     note.set(if tx.title.is_empty() { tx.description } else { tx.title });
                 }
             }
+
+            categories.set(loaded_cats);
+            accounts.set(loaded_accts);
         });
     }
 
-    let (cat_icon, cat_label) = CATEGORIES[*selected_cat.read()];
+    let cat_icon = {
+        let cats = categories.read();
+        let id = *selected_cat_id.read();
+        cats.iter().find(|c| c.id == id).map(|c| c.icon.clone()).unwrap_or_default()
+    };
+    let cat_label = {
+        let cats = categories.read();
+        let id = *selected_cat_id.read();
+        cats.iter().find(|c| c.id == id).map(|c| c.name.to_uppercase()).unwrap_or_else(|| "SELECT".to_string())
+    };
 
     rsx! {
         div {
@@ -128,13 +146,18 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 p { class: "txform-section-label", "ACCOUNT" }
                 div {
                     class: "chip-row",
-                    for (i, name) in ACCOUNTS.iter().enumerate() {
-                        button {
-                            class: if *selected_acct.read() == i { "chip chip--on" } else { "chip" },
-                            onclick: move |_| selected_acct.set(i),
-                            "{name}"
+                    {accounts.read().iter().map(|acct| {
+                        let acct_id   = acct.id;
+                        let acct_name = acct.name.to_uppercase();
+                        let selected  = *selected_acct_id.read() == acct_id;
+                        rsx! {
+                            button {
+                                class: if selected { "chip chip--on" } else { "chip" },
+                                onclick: move |_| selected_acct_id.set(acct_id),
+                                "{acct_name}"
+                            }
                         }
-                    }
+                    })}
                 }
             }
 
@@ -175,9 +198,9 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     onclick: {
                         let db = db.clone();
                         move |_| {
-                            let now        = Local::now();
-                            let amt: f32   = amount.read().parse().unwrap_or(0.0);
-                            let title      = note.read().clone();
+                            let now      = Local::now();
+                            let amt: f32 = amount.read().parse().unwrap_or(0.0);
+                            let title    = note.read().clone();
                             let tx = Transactions {
                                 id:          id.unwrap_or(0),
                                 title:       title.clone(),
@@ -185,8 +208,8 @@ fn TransactionForm(id: Option<i32>) -> Element {
                                 tx_date:     now.date_naive(),
                                 tx_time:     now.time(),
                                 tx_type:     tx_type.read().clone(),
-                                category:    *selected_cat.read() as i16,
-                                account:     *selected_acct.read() as i16,
+                                category:    *selected_cat_id.read() as i16,
+                                account:     *selected_acct_id.read() as i16,
                                 description: title,
                             };
                             if is_edit {
@@ -213,17 +236,23 @@ fn TransactionForm(id: Option<i32>) -> Element {
             p { class: "drawer-title", "CATEGORY" }
             div {
                 class: "cat-grid",
-                for (i, (icon, label)) in CATEGORIES.iter().enumerate() {
-                    button {
-                        class: if *selected_cat.read() == i { "cat-grid-card cat-grid-card--on" } else { "cat-grid-card" },
-                        onclick: move |_| {
-                            selected_cat.set(i);
-                            cat_drawer.set(false);
-                        },
-                        span { class: "cat-icon", "{icon}" }
-                        span { class: "cat-label", "{label}" }
+                {categories.read().iter().map(|cat| {
+                    let cat_id    = cat.id;
+                    let cat_icon  = cat.icon.clone();
+                    let cat_name  = cat.name.to_uppercase();
+                    let selected  = *selected_cat_id.read() == cat_id;
+                    rsx! {
+                        button {
+                            class: if selected { "cat-grid-card cat-grid-card--on" } else { "cat-grid-card" },
+                            onclick: move |_| {
+                                selected_cat_id.set(cat_id);
+                                cat_drawer.set(false);
+                            },
+                            span { class: "cat-icon", "{cat_icon}" }
+                            span { class: "cat-label", "{cat_name}" }
+                        }
                     }
-                }
+                })}
             }
         }
     }

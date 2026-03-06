@@ -9,7 +9,6 @@ pub fn Home() -> Element {
         div {
             class: "home-screen",
 
-            // ── Header ──────────────────────────────────────
             div {
                 class: "home-header",
                 div {
@@ -19,7 +18,6 @@ pub fn Home() -> Element {
                 }
             }
 
-            // ── Balance hero ─────────────────────────────────
             div {
                 class: "balance-hero",
                 p { class: "balance-label", "TOTAL BALANCE" }
@@ -37,7 +35,6 @@ pub fn Home() -> Element {
                 }
             }
 
-            // ── Action grid ──────────────────────────────────
             div {
                 class: "action-grid",
 

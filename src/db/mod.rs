@@ -1,3 +1,4 @@
+pub mod seed;
 pub mod tables;
 
 use rusqlite::{Connection, Result};
@@ -26,5 +27,6 @@ pub fn init() -> Result<DbConnection> {
             "#,
     )?;
     tables::create_all(&conn)?;
+    seed::seed(&conn)?;
     Ok(Arc::new(Mutex::new(conn)))
 }
