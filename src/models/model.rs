@@ -43,7 +43,7 @@ pub enum BillingCycle {
     Yearly,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TransactionType {
     Income,
     Expense,
