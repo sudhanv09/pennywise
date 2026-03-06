@@ -47,6 +47,10 @@ fn main() {
 
 #[component]
 fn App() -> Element {
+    use_context_provider(|| {
+        db::init().expect("in-memory db failed")
+    });
+
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
