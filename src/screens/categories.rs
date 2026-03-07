@@ -121,21 +121,23 @@ pub fn Categories() -> Element {
                     div { class: "icon-picker-grid",
                         {
                             let search = icon_search.read().to_lowercase();
-                            LUCIDE_ICONS.iter()
+                            let filtered: Vec<&str> = LUCIDE_ICONS.iter()
                                 .filter(|name| search.is_empty() || name.contains(search.as_str()))
                                 .take(60)
-                                .map(|name| {
-                                    let n = name.to_string();
-                                    let selected = *f_icon.read() == n;
-                                    rsx! {
-                                        button {
-                                            key: "{n}",
-                                            class: if selected { "icon-picker-cell icon-picker-cell--on" } else { "icon-picker-cell" },
-                                            onclick: move |_| f_icon.set(n.clone()),
-                                            i { class: "icon-{name}" }
-                                        }
+                                .copied()
+                                .collect();
+                            filtered.into_iter().map(|name| {
+                                let n = name.to_string();
+                                let selected = *f_icon.read() == n;
+                                rsx! {
+                                    button {
+                                        key: "{n}",
+                                        class: if selected { "icon-picker-cell icon-picker-cell--on" } else { "icon-picker-cell" },
+                                        onclick: move |_| f_icon.set(n.clone()),
+                                        i { class: "icon-{name}" }
                                     }
-                                })
+                                }
+                            })
                         }
                     }
                 }
