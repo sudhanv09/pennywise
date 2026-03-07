@@ -6,15 +6,15 @@ pub fn seed(conn: &Connection) -> Result<()> {
     if cat_count == 0 {
         conn.execute_batch(
             "INSERT INTO categories (name, icon) VALUES
-                ('Food', '🍔'),
-                ('Transport', '🚌'),
-                ('Shopping', '🛍'),
-                ('Health', '💊'),
-                ('Entertainment', '🎬'),
-                ('Housing', '🏠'),
-                ('Travel', '✈️'),
-                ('Education', '📚'),
-                ('Gifts', '🎁');",
+                ('Food', 'utensils'),
+                ('Transport', 'bus'),
+                ('Shopping', 'shopping-bag'),
+                ('Health', 'heart-pulse'),
+                ('Entertainment', 'clapperboard'),
+                ('Housing', 'house'),
+                ('Travel', 'plane'),
+                ('Education', 'book-open'),
+                ('Gifts', 'gift');",
         )?;
     }
 
@@ -23,9 +23,9 @@ pub fn seed(conn: &Connection) -> Result<()> {
     if acct_count == 0 {
         conn.execute_batch(
             "INSERT INTO accounts (name, starting_balance, icon, currency) VALUES
-                ('Cash', 0.0, '💵', 'USD'),
-                ('Bank', 0.0, '🏦', 'USD'),
-                ('Credit Card', 0.0, '💳', 'USD');",
+                ('Cash', 0.0, 'banknote', 'USD'),
+                ('Bank', 0.0, 'landmark', 'USD'),
+                ('Credit Card', 0.0, 'credit-card', 'USD');",
         )?;
     }
 
