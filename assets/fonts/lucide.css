@@ -1,8 +1,3 @@
-@font-face {
-  font-family: "lucide";
-  src: url('lucide.woff2') format('woff2');
-}
-
 [class^="icon-"], [class*=" icon-"] {
   font-family: 'lucide' !important;font-size: inherit;
   font-style:normal;
@@ -1962,5 +1957,3 @@
 .icon-zodiac-virgo::before { content: "\e6d7"; }
 .icon-zoom-in::before { content: "\e1b6"; }
 .icon-zoom-out::before { content: "\e1b7"; }
-
-

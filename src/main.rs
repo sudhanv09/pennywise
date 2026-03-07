@@ -22,7 +22,7 @@ use screens::{
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
 const LUCIDE_CSS: Asset = asset!("/assets/fonts/lucide.css");
-const _LUCIDE_FONT: Asset = asset!("/assets/fonts/lucide.woff2");
+const LUCIDE_FONT: Asset = asset!("/assets/fonts/lucide.woff2");
 
 #[derive(Clone, Routable, PartialEq, Debug)]
 enum Route {
@@ -63,11 +63,15 @@ fn main() {
 #[component]
 fn App() -> Element {
     use_context_provider(|| {
-        db::init().expect("in-memory db failed")
+        db::init().expect("db init failed")
     });
 
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
+        document::Style { {format!(
+            "@font-face {{ font-family: 'lucide'; src: url('{}') format('woff2'); }}",
+            LUCIDE_FONT
+        )} }
         document::Link { rel: "stylesheet", href: LUCIDE_CSS }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         Router::<Route> {}
