@@ -182,7 +182,6 @@ pub fn Transactions() -> Element {
     };
 
     let mtd_class = if mtd_total >= 0.0 { "mtd-total mtd-total--pos" } else { "mtd-total mtd-total--neg" };
-    let mtd_sign  = if mtd_total >= 0.0 { "+" } else { "" };
     let cur_mn    = month_name(*sel_month.read());
     let cur_yr    = *sel_year.read();
 
@@ -210,7 +209,13 @@ pub fn Transactions() -> Element {
             div {
                 class: "mtd-row",
                 span { class: "mtd-label", "{cur_mn} {cur_yr} MTD:" }
-                span { class: "{mtd_class}", "${mtd_total:.2}" }
+                span { class: "{mtd_class}",
+                    { if mtd_total >= 0.0 {
+                        format!("+${:.2}", mtd_total)
+                    } else {
+                        format!("-${:.2}", mtd_total.abs())
+                    }}
+                }
             }
 
             div {

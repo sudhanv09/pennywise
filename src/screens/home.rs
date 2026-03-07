@@ -125,7 +125,7 @@ pub fn Home() -> Element {
                 }
                 div {
                     class: "burn-pill",
-                    span { class: "burn-value", "${burn_val:.2}" }
+                    span { class: "burn-value", { format!("${:.2}", burn_val.abs()) } }
                     span { class: "burn-sep" }
                     span { class: "burn-tag", "MTH EXPENSE" }
                 }
