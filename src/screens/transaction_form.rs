@@ -37,13 +37,19 @@ fn TransactionForm(id: Option<i32>) -> Element {
     let mut loans:      Signal<Vec<Loans>>    = use_signal(Vec::new);
     let mut selected_goal_id: Signal<Option<i32>> = use_signal(|| None);
     let mut selected_loan_id: Signal<Option<i32>> = use_signal(|| None);
+    let mut frequency:      Signal<Option<String>> = use_signal(|| None);
+    let mut recurring_till: Signal<String>         = use_signal(String::new);
 
     let is_edit = id.is_some();
     let nav     = use_navigator();
+    let mut initialized = use_signal(|| false);
 
     {
         let db = db.clone();
         use_effect(move || {
+            if *initialized.read() { return; }
+            initialized.set(true);
+
             let loaded_cats  = cat_repo::get_all(&db).unwrap_or_default();
             let loaded_accts = acct_repo::get_all(&db).unwrap_or_default();
             let loaded_goals = goal_repo::get_all(&db).unwrap_or_default();
@@ -70,6 +76,12 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     tx_time.set(tx.tx_time);
                     selected_goal_id.set(tx.goal_id);
                     selected_loan_id.set(tx.loan_id);
+                    frequency.set(tx.frequency.clone());
+                    recurring_till.set(tx.recurring_till.clone().unwrap_or_default());
+                    if tx.frequency.is_some() {
+                        let mut t = selected_tags.write();
+                        if !t.contains(&3) { t.push(3); }
+                    }
                 }
             }
 
@@ -157,13 +169,12 @@ fn TransactionForm(id: Option<i32>) -> Element {
 
                 div {
                     class: "txform-amount-wrap",
-                    span { class: "txform-currency", "$" }
                     input {
                         class: "txform-amount-input",
                         r#type: "number",
                         min: "0",
                         step: "0.01",
-                        placeholder: "0.00",
+                        placeholder: "$0.00",
                         value: "{amount}",
                         oninput: move |e| amount.set(e.value()),
                     }
@@ -218,10 +229,43 @@ fn TransactionForm(id: Option<i32>) -> Element {
                             class: if selected_tags.read().contains(&i) { "chip chip--on" } else { "chip" },
                             onclick: move |_| {
                                 let mut t = selected_tags.write();
-                                if t.contains(&i) { t.retain(|&x| x != i); }
-                                else { t.push(i); }
+                                if t.contains(&i) {
+                                    t.retain(|&x| x != i);
+                                    if i == 3 {
+                                        frequency.set(None);
+                                        recurring_till.set(String::new());
+                                    }
+                                } else {
+                                    t.push(i);
+                                }
                             },
                             "{tag}"
+                        }
+                    }
+                }
+            }
+
+            if selected_tags.read().contains(&3) {
+                div {
+                    class: "txform-section",
+                    p { class: "txform-section-label", "FREQUENCY" }
+                    div {
+                        class: "chip-row",
+                        for freq in ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"] {
+                            button {
+                                class: if *frequency.read() == Some(freq.to_string()) { "chip chip--on" } else { "chip" },
+                                onclick: move |_| frequency.set(Some(freq.to_string())),
+                                "{freq}"
+                            }
+                        }
+                    }
+                    div { class: "txform-till-row",
+                        span { class: "txform-section-label", "TILL" }
+                        input {
+                            class: "txform-date-pill",
+                            r#type: "date",
+                            value: "{recurring_till}",
+                            oninput: move |e| recurring_till.set(e.value()),
                         }
                     }
                 }
@@ -314,6 +358,8 @@ fn TransactionForm(id: Option<i32>) -> Element {
                                 description: note.read().clone(),
                                 goal_id:     *selected_goal_id.read(),
                                 loan_id:     *selected_loan_id.read(),
+                                frequency:      frequency.read().clone(),
+                                recurring_till: if recurring_till.read().is_empty() { None } else { Some(recurring_till.read().clone()) },
                             };
                             if is_edit {
                                 let _ = tx_repo::update(&db, &tx);

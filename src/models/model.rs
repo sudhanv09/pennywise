@@ -71,4 +71,6 @@ pub struct Transactions {
     pub description: String,
     pub goal_id: Option<i32>,
     pub loan_id: Option<i32>,
+    pub frequency: Option<String>,
+    pub recurring_till: Option<String>,
 }

@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
-use chrono::{Local, Datelike};
+use chrono::{Duration, Local, Datelike, NaiveDate};
 use crate::db::DbConnection;
-use crate::models::model::TransactionType;
+use crate::models::model::{TransactionType, Transactions as TransactionModel};
 use crate::repository::transactions as tx_repo;
 use crate::Route;
 
@@ -46,12 +46,101 @@ struct DayGroup {
     items:       Vec<TxRow>,
 }
 
-fn build_groups(month: u32, year: i32, db: &DbConnection) -> Vec<DayGroup> {
-    let txs = tx_repo::get_by_month(db, month, year).unwrap_or_default();
+fn expand_recurring(tx: &TransactionModel, year: i32, month: u32) -> Vec<TransactionModel> {
+    let freq = match tx.frequency.as_deref() {
+        Some(f) => f,
+        None => return vec![],
+    };
 
-    // Group by date (txs are already ordered DESC by date+time)
+    let month_start = NaiveDate::from_ymd_opt(year, month, 1).unwrap();
+    let month_end = if month == 12 {
+        NaiveDate::from_ymd_opt(year + 1, 1, 1).unwrap()
+    } else {
+        NaiveDate::from_ymd_opt(year, month + 1, 1).unwrap()
+    };
+
+    let till = tx.recurring_till.as_deref()
+        .and_then(|s| NaiveDate::parse_from_str(s, "%Y-%m-%d").ok());
+
+    // Effective end: earlier of month boundary or recurring_till+1
+    let effective_end = match till {
+        Some(t) if t < month_end => t + Duration::days(1),
+        _ => month_end,
+    };
+
+    // Nothing to generate if start is after effective end
+    if tx.tx_date >= effective_end {
+        return vec![];
+    }
+
+    let mut result = vec![];
+
+    match freq {
+        "DAILY" => {
+            let mut d = tx.tx_date.max(month_start);
+            while d < effective_end {
+                let mut occ = tx.clone();
+                occ.tx_date = d;
+                result.push(occ);
+                d += Duration::days(1);
+            }
+        }
+        "WEEKLY" => {
+            let mut d = tx.tx_date;
+            if d < month_start {
+                let diff  = (month_start - d).num_days();
+                let weeks = (diff + 6) / 7; // ceil to next week boundary
+                d += Duration::weeks(weeks);
+            }
+            while d < effective_end {
+                let mut occ = tx.clone();
+                occ.tx_date = d;
+                result.push(occ);
+                d += Duration::weeks(1);
+            }
+        }
+        "MONTHLY" => {
+            if let Some(d) = NaiveDate::from_ymd_opt(year, month, tx.tx_date.day()) {
+                if d >= tx.tx_date && d < effective_end {
+                    let mut occ = tx.clone();
+                    occ.tx_date = d;
+                    result.push(occ);
+                }
+            }
+        }
+        "YEARLY" => {
+            if tx.tx_date.month() == month {
+                if let Some(d) = NaiveDate::from_ymd_opt(year, month, tx.tx_date.day()) {
+                    if d >= tx.tx_date && d < effective_end {
+                        let mut occ = tx.clone();
+                        occ.tx_date = d;
+                        result.push(occ);
+                    }
+                }
+            }
+        }
+        _ => {}
+    }
+
+    result
+}
+
+fn build_groups(month: u32, year: i32, db: &DbConnection) -> Vec<DayGroup> {
+    // Non-recurring transactions for this month
+    let mut all_txs = tx_repo::get_by_month(db, month, year).unwrap_or_default();
+
+    // Expand recurring transactions into this month's occurrences
+    let recurring = tx_repo::get_all_recurring(db).unwrap_or_default();
+    for tx in &recurring {
+        all_txs.extend(expand_recurring(tx, year, month));
+    }
+
+    // Sort by date DESC, time DESC before grouping
+    all_txs.sort_by(|a, b| b.tx_date.cmp(&a.tx_date).then(b.tx_time.cmp(&a.tx_time)));
+
+    // Group by date
     let mut groups: Vec<DayGroup> = Vec::new();
-    for tx in txs {
+    for tx in all_txs {
         let label = tx.tx_date.format("%b %-d, %Y").to_string().to_uppercase();
         let row = TxRow {
             id:        tx.id,

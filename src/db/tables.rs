@@ -50,8 +50,10 @@ pub fn create_all(conn: &Connection) -> Result<()> {
             category    INTEGER NOT NULL,
             account     INTEGER NOT NULL,
             description TEXT    NOT NULL,
-            goal_id     INTEGER,
-            loan_id     INTEGER
+            goal_id         INTEGER,
+            loan_id         INTEGER,
+            frequency       TEXT,
+            recurring_till  TEXT
         );
     ")?;
 
