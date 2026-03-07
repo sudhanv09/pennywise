@@ -264,15 +264,17 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     p { class: "txform-section-label", "FREQUENCY" }
                     div {
                         class: "chip-row",
-                        for cycle in BillingCycle::all() {
+                        {BillingCycle::all().iter().map(|cycle| {
                             let label = cycle.as_str();
                             let cycle = cycle.clone();
-                            button {
-                                class: if *frequency.read() == Some(cycle.clone()) { "chip chip--on" } else { "chip" },
-                                onclick: move |_| frequency.set(Some(cycle.clone())),
-                                "{label}"
+                            rsx! {
+                                button {
+                                    class: if *frequency.read() == Some(cycle.clone()) { "chip chip--on" } else { "chip" },
+                                    onclick: move |_| frequency.set(Some(cycle.clone())),
+                                    "{label}"
+                                }
                             }
-                        }
+                        })}
                     }
                     div { class: "txform-till-row",
                         span { class: "txform-section-label", "TILL" }

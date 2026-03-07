@@ -4,9 +4,10 @@ use rusqlite::{params, Result};
 
 fn billing_cycle_to_str(cycle: &BillingCycle) -> &'static str {
     match cycle {
-        BillingCycle::Weekly => "weekly",
+        BillingCycle::Daily   => "daily",
+        BillingCycle::Weekly  => "weekly",
         BillingCycle::Monthly => "monthly",
-        BillingCycle::Yearly => "yearly",
+        BillingCycle::Yearly  => "yearly",
     }
 }
 
