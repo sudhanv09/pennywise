@@ -211,9 +211,9 @@ pub fn Transactions() -> Element {
                 span { class: "mtd-label", "{cur_mn} {cur_yr} MTD:" }
                 span { class: "{mtd_class}",
                     { if mtd_total >= 0.0 {
-                        format!("+${:.2}", mtd_total)
+                        format!("${:.2}", mtd_total.abs())
                     } else {
-                        format!("-${:.2}", mtd_total.abs())
+                        format!("${:.2}", mtd_total.abs())
                     }}
                 }
             }
