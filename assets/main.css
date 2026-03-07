@@ -1063,7 +1063,9 @@ a { color: inherit; text-decoration: none; }
     gap: 10px;
 }
 
-.settings-row-icon { font-size: 20px; line-height: 1; }
+.settings-row-with-icon i { font-size: 18px; line-height: 1; color: var(--accent); }
+
+.settings-row-icon { font-size: 14px; line-height: 1; }
 
 .settings-row-label {
     font-family: var(--font-ui);
@@ -1187,7 +1189,66 @@ a { color: inherit; text-decoration: none; }
     padding: 14px 20px;
 }
 
-/* ── Icon Picker ─────────────────────────────────── */
+/* ── Icon Picker Drawer (nested) ────────────────── */
+.icon-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    pointer-events: none;
+    z-index: 300;
+    transition: background 0.3s ease;
+}
+
+.icon-drawer-backdrop.visible {
+    background: rgba(0, 0, 0, 0.6);
+    pointer-events: all;
+}
+
+.icon-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-radius: var(--radius) var(--radius) 0 0;
+    border-top: 1px solid var(--border-hi);
+    padding: 12px 20px 40px;
+    z-index: 301;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    max-height: 85dvh;
+    overflow-y: auto;
+}
+
+.icon-drawer.open { transform: translateY(0); }
+
+.icon-field-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border-hi);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.icon-field-btn i {
+    font-size: 20px;
+    color: var(--accent);
+}
+
+.icon-field-placeholder {
+    color: var(--text-dim);
+}
+
+/* ── Icon Picker Grid ──────────────────────────────── */
 .icon-picker-row {
     display: flex;
     align-items: center;

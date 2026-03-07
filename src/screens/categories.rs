@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
+use crate::components::icon_picker::IconPicker;
 use crate::db::DbConnection;
-use crate::icons::LUCIDE_ICONS;
 use crate::models::model::Category;
 use crate::repository::categories as repo;
 
@@ -15,7 +15,7 @@ pub fn Categories() -> Element {
 
     let mut f_name = use_signal(String::new);
     let mut f_icon = use_signal(String::new);
-    let mut icon_search = use_signal(String::new);
+    let mut icon_picker_open = use_signal(|| false);
 
     {
         let db = db.clone();
@@ -29,7 +29,6 @@ pub fn Categories() -> Element {
     let open_new = move |_| {
         f_name.set(String::new());
         f_icon.set(String::new());
-        icon_search.set(String::new());
         editing_id.set(-1);
         drawer_open.set(true);
     };
@@ -67,13 +66,12 @@ pub fn Categories() -> Element {
                             onclick: move |_| {
                                 f_name.set(c.name.clone());
                                 f_icon.set(c.icon.clone());
-                                icon_search.set(String::new());
                                 editing_id.set(id);
                                 drawer_open.set(true);
                             },
                             div { class: "settings-row-main",
                                 div { class: "settings-row-with-icon",
-                                    i { class: "settings-row-icon icon-{icon}" }
+                                    i { class: "icon-{icon}" }
                                     span { class: "settings-row-label", "{name}" }
                                 }
                             }
@@ -104,40 +102,14 @@ pub fn Categories() -> Element {
                 }
                 div { class: "drawer-field",
                     label { "ICON" }
-                    div { class: "icon-picker-row",
-                        if !f_icon.read().is_empty() {
-                            div { class: "icon-picker-preview",
-                                i { class: "icon-{f_icon}" }
-                            }
-                        }
-                        input {
-                            class: "drawer-input icon-picker-search",
-                            r#type: "text",
-                            placeholder: "Search icons…",
-                            value: "{icon_search}",
-                            oninput: move |e| icon_search.set(e.value()),
-                        }
-                    }
-                    div { class: "icon-picker-grid",
-                        {
-                            let search = icon_search.read().to_lowercase();
-                            let filtered: Vec<&str> = LUCIDE_ICONS.iter()
-                                .filter(|name| search.is_empty() || name.contains(search.as_str()))
-                                .take(60)
-                                .copied()
-                                .collect();
-                            filtered.into_iter().map(|name| {
-                                let n = name.to_string();
-                                let selected = *f_icon.read() == n;
-                                rsx! {
-                                    button {
-                                        key: "{n}",
-                                        class: if selected { "icon-picker-cell icon-picker-cell--on" } else { "icon-picker-cell" },
-                                        onclick: move |_| f_icon.set(n.clone()),
-                                        i { class: "icon-{name}" }
-                                    }
-                                }
-                            })
+                    button {
+                        class: "icon-field-btn",
+                        onclick: move |_| icon_picker_open.set(true),
+                        if f_icon.read().is_empty() {
+                            span { class: "icon-field-placeholder", "Choose icon…" }
+                        } else {
+                            i { class: "icon-{f_icon}" }
+                            span { "{f_icon}" }
                         }
                     }
                 }
@@ -178,5 +150,7 @@ pub fn Categories() -> Element {
                 }
             }
         }
+
+        IconPicker { value: f_icon, open: icon_picker_open }
     }
 }

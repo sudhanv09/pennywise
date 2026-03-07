@@ -1,21 +1,23 @@
-use dioxus::prelude::*;
+use crate::components::icon_picker::IconPicker;
 use crate::db::DbConnection;
 use crate::models::model::Account;
 use crate::repository::accounts as repo;
+use dioxus::prelude::*;
 
 #[component]
 pub fn Accounts() -> Element {
-    let db  = use_context::<DbConnection>();
+    let db = use_context::<DbConnection>();
     let nav = use_navigator();
 
-    let mut items:      Signal<Vec<Account>> = use_signal(Vec::new);
-    let mut editing_id: Signal<i32>          = use_signal(|| -1i32);
-    let mut drawer_open                      = use_signal(|| false);
+    let mut items: Signal<Vec<Account>> = use_signal(Vec::new);
+    let mut editing_id: Signal<i32> = use_signal(|| -1i32);
+    let mut drawer_open = use_signal(|| false);
 
-    let mut f_name     = use_signal(String::new);
-    let mut f_balance  = use_signal(String::new);
-    let mut f_icon     = use_signal(String::new);
+    let mut f_name = use_signal(String::new);
+    let mut f_balance = use_signal(String::new);
+    let mut f_icon = use_signal(String::new);
     let mut f_currency = use_signal(String::new);
+    let mut icon_picker_open = use_signal(|| false);
 
     {
         let db = db.clone();
@@ -29,7 +31,7 @@ pub fn Accounts() -> Element {
     let open_new = move |_| {
         f_name.set(String::new());
         f_balance.set(String::new());
-        f_icon.set("💳".to_string());
+        f_icon.set("credit-card".to_string());
         f_currency.set("USD".to_string());
         editing_id.set(-1);
         drawer_open.set(true);
@@ -59,7 +61,8 @@ pub fn Accounts() -> Element {
                 {items.read().iter().map(|a| {
                     let id  = a.id;
                     let name = a.name.clone();
-                    let sub  = format!("{} • {}", a.currency, a.icon);
+                    let item_icon = a.icon.clone();
+                    let sub  = format!("{}", a.currency);
                     let a    = a.clone();
                     rsx! {
                         button {
@@ -74,7 +77,10 @@ pub fn Accounts() -> Element {
                                 drawer_open.set(true);
                             },
                             div { class: "settings-row-main",
-                                span { class: "settings-row-label", "{name}" }
+                                div { class: "settings-row-with-icon",
+                                    i { class: "icon-{item_icon}" }
+                                    span { class: "settings-row-label", "{name}" }
+                                }
                                 span { class: "settings-row-sub", "{sub}" }
                             }
                             span { class: "settings-row-chevron", "›" }
@@ -112,10 +118,15 @@ pub fn Accounts() -> Element {
                 }
                 div { class: "drawer-field",
                     label { "ICON" }
-                    input {
-                        class: "drawer-input", r#type: "text", placeholder: "💳",
-                        value: "{f_icon}",
-                        oninput: move |e| f_icon.set(e.value()),
+                    button {
+                        class: "icon-field-btn",
+                        onclick: move |_| icon_picker_open.set(true),
+                        if f_icon.read().is_empty() {
+                            span { class: "icon-field-placeholder", "Choose icon…" }
+                        } else {
+                            i { class: "icon-{f_icon}" }
+                            span { "{f_icon}" }
+                        }
                     }
                 }
                 div { class: "drawer-field",
@@ -165,5 +176,7 @@ pub fn Accounts() -> Element {
                 }
             }
         }
+
+        IconPicker { value: f_icon, open: icon_picker_open }
     }
 }
