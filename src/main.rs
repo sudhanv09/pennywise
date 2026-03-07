@@ -20,6 +20,8 @@ use screens::{
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/main.css");
+const LUCIDE_CSS: Asset = asset!("/assets/fonts/lucide.css");
+const _LUCIDE_FONT: Asset = asset!("/assets/fonts/lucide.woff2");
 
 #[derive(Clone, Routable, PartialEq, Debug)]
 enum Route {
@@ -65,6 +67,7 @@ fn App() -> Element {
 
     rsx! {
         document::Link { rel: "icon", href: FAVICON }
+        document::Link { rel: "stylesheet", href: LUCIDE_CSS }
         document::Link { rel: "stylesheet", href: MAIN_CSS }
         Router::<Route> {}
     }
