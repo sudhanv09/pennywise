@@ -7,9 +7,9 @@ pub fn AppDock() -> Element {
         div {
             id: "appdock",
             ul {
-                li { Link { to: Route::Home, "Home" } }
-                li { Link { to: Route::Transactions, "Transactions" } }
-                li { Link { to: Route::Settings, "Settings" } }
+                li { Link { to: Route::Home, i { class: "icon-home" } "Home" } }
+                li { Link { to: Route::Transactions, i { class: "icon-receipt-text" } "Transactions" } }
+                li { Link { to: Route::Settings, i { class: "icon-settings" } "Settings" } }
             }
         }
     }
