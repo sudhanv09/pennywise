@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use chrono::{Local, NaiveDate};
+use chrono::{Local, NaiveDate, NaiveTime};
 use crate::db::DbConnection;
 use crate::models::model::{Account, Category, TransactionType, Transactions};
 use crate::repository::{accounts as acct_repo, categories as cat_repo, transactions as tx_repo};
@@ -20,14 +20,16 @@ const TAGS: &[&str] = &["LOAN", "GOAL", "SAVINGS", "RECURRING"];
 fn TransactionForm(id: Option<i32>) -> Element {
     let db = use_context::<DbConnection>();
 
-    let mut amount        = use_signal(|| String::from("0.00"));
+    let mut amount        = use_signal(String::new);
     let mut tx_type       = use_signal(|| TransactionType::Expense);
     let mut selected_cat_id:  Signal<i32> = use_signal(|| 0);
     let mut selected_acct_id: Signal<i32> = use_signal(|| 0);
     let mut selected_tags: Signal<Vec<usize>> = use_signal(Vec::new);
+    let mut title         = use_signal(String::new);
     let mut note          = use_signal(String::new);
     let mut cat_drawer    = use_signal(|| false);
     let mut tx_date       = use_signal(|| Local::now().date_naive());
+    let mut tx_time       = use_signal(|| Local::now().time());
 
     let mut categories: Signal<Vec<Category>> = use_signal(Vec::new);
     let mut accounts:   Signal<Vec<Account>>  = use_signal(Vec::new);
@@ -56,8 +58,10 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     tx_type.set(tx.tx_type);
                     selected_cat_id.set(tx.category as i32);
                     selected_acct_id.set(tx.account as i32);
-                    note.set(if tx.title.is_empty() { tx.description } else { tx.title });
+                    title.set(tx.title);
+                    note.set(tx.description);
                     tx_date.set(tx.tx_date);
+                    tx_time.set(tx.tx_time);
                 }
             }
 
@@ -65,6 +69,9 @@ fn TransactionForm(id: Option<i32>) -> Element {
             accounts.set(loaded_accts);
         });
     }
+
+    let tx_date_str = tx_date.read().format("%Y-%m-%d").to_string();
+    let tx_time_str = tx_time.read().format("%H:%M").to_string();
 
     let cat_icon = {
         let cats = categories.read();
@@ -91,15 +98,28 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 span { class: "txform-title",
                     { if is_edit { "EDIT ENTRY" } else { "NEW ENTRY" } }
                 }
-                input {
-                    class: "txform-date-pill",
-                    r#type: "date",
-                    value: "{tx_date.read().format(\"%Y-%m-%d\")}",
-                    oninput: move |e| {
-                        if let Ok(d) = NaiveDate::parse_from_str(&e.value(), "%Y-%m-%d") {
-                            tx_date.set(d);
-                        }
-                    },
+                div {
+                    class: "txform-datetime-row",
+                    input {
+                        class: "txform-date-pill",
+                        r#type: "date",
+                        value: "{tx_date_str}",
+                        oninput: move |e| {
+                            if let Ok(d) = NaiveDate::parse_from_str(&e.value(), "%Y-%m-%d") {
+                                tx_date.set(d);
+                            }
+                        },
+                    }
+                    input {
+                        class: "txform-time-pill",
+                        r#type: "time",
+                        value: "{tx_time_str}",
+                        oninput: move |e| {
+                            if let Ok(t) = NaiveTime::parse_from_str(&e.value(), "%H:%M") {
+                                tx_time.set(t);
+                            }
+                        },
+                    }
                 }
             }
 
@@ -141,7 +161,13 @@ fn TransactionForm(id: Option<i32>) -> Element {
 
                 div {
                     class: "txform-meta-row",
-                    span { class: "txform-meta", "USD  •  PERSONAL" }
+                    input {
+                        class: "txform-title-input",
+                        r#type: "text",
+                        placeholder: "Title…",
+                        value: "{title}",
+                        oninput: move |e| title.set(e.value()),
+                    }
                     button {
                         class: "cat-pill",
                         onclick: move |_| cat_drawer.set(true),
@@ -210,17 +236,16 @@ fn TransactionForm(id: Option<i32>) -> Element {
                         let db = db.clone();
                         move |_| {
                             let amt: f32 = amount.read().parse().unwrap_or(0.0);
-                            let title    = note.read().clone();
                             let tx = Transactions {
                                 id:          id.unwrap_or(0),
-                                title:       title.clone(),
+                                title:       title.read().clone(),
                                 amount:      amt,
                                 tx_date:     *tx_date.read(),
-                                tx_time:     Local::now().time(),
+                                tx_time:     *tx_time.read(),
                                 tx_type:     tx_type.read().clone(),
                                 category:    *selected_cat_id.read() as i16,
                                 account:     *selected_acct_id.read() as i16,
-                                description: title,
+                                description: note.read().clone(),
                             };
                             if is_edit {
                                 let _ = tx_repo::update(&db, &tx);
