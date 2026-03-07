@@ -27,6 +27,7 @@ pub fn init() -> Result<DbConnection> {
             "#,
     )?;
     tables::create_all(&conn)?;
+    tables::migrate(&conn)?;
     seed::seed(&conn)?;
     Ok(Arc::new(Mutex::new(conn)))
 }

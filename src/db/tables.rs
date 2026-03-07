@@ -53,9 +53,16 @@ pub fn create_all(conn: &Connection) -> Result<()> {
             goal_id         INTEGER,
             loan_id         INTEGER,
             frequency       TEXT,
-            recurring_till  TEXT
+            recurring_till  TEXT,
+            to_account      INTEGER
         );
     ")?;
 
+    Ok(())
+}
+
+pub fn migrate(conn: &Connection) -> Result<()> {
+    // Idempotent: SQLite errors if column already exists; we ignore that.
+    conn.execute("ALTER TABLE transactions ADD COLUMN to_account INTEGER", []).ok();
     Ok(())
 }

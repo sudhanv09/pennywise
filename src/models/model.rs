@@ -99,4 +99,5 @@ pub struct Transactions {
     pub loan_id: Option<i32>,
     pub frequency: Option<String>,
     pub recurring_till: Option<String>,
+    pub to_account: Option<i16>,
 }

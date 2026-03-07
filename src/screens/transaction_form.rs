@@ -40,6 +40,7 @@ fn TransactionForm(id: Option<i32>) -> Element {
     let mut loans: Signal<Vec<Loans>> = use_signal(Vec::new);
     let mut selected_goal_id: Signal<Option<i32>> = use_signal(|| None);
     let mut selected_loan_id: Signal<Option<i32>> = use_signal(|| None);
+    let mut selected_to_acct_id: Signal<Option<i32>> = use_signal(|| None);
     let mut frequency: Signal<Option<BillingCycle>> = use_signal(|| None);
     let mut recurring_till: Signal<String> = use_signal(String::new);
 
@@ -81,6 +82,7 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     tx_time.set(tx.tx_time);
                     selected_goal_id.set(tx.goal_id);
                     selected_loan_id.set(tx.loan_id);
+                    selected_to_acct_id.set(tx.to_account.map(|a| a as i32));
                     frequency.set(tx.frequency.as_deref().and_then(BillingCycle::from_str));
                     recurring_till.set(tx.recurring_till.clone().unwrap_or_default());
                     if tx.frequency.is_some() {
@@ -214,7 +216,9 @@ fn TransactionForm(id: Option<i32>) -> Element {
 
             div {
                 class: "txform-section",
-                p { class: "txform-section-label", "ACCOUNT" }
+                p { class: "txform-section-label",
+                    { if *tx_type.read() == TransactionType::Transfer { "FROM ACCOUNT" } else { "ACCOUNT" } }
+                }
                 div {
                     class: "chip-row",
                     {accounts.read().iter().map(|acct| {
@@ -229,6 +233,29 @@ fn TransactionForm(id: Option<i32>) -> Element {
                             }
                         }
                     })}
+                }
+            }
+
+            if *tx_type.read() == TransactionType::Transfer {
+                div {
+                    class: "txform-section",
+                    p { class: "txform-section-label", "TO ACCOUNT" }
+                    div {
+                        class: "chip-row",
+                        {accounts.read().iter().map(|acct| {
+                            let acct_id   = acct.id;
+                            let acct_name = acct.name.to_uppercase();
+                            let selected  = *selected_to_acct_id.read() == Some(acct_id);
+                            rsx! {
+                                button {
+                                    key: "{acct_id}",
+                                    class: if selected { "chip chip--on" } else { "chip" },
+                                    onclick: move |_| selected_to_acct_id.set(Some(acct_id)),
+                                    "{acct_name}"
+                                }
+                            }
+                        })}
+                    }
                 }
             }
 
@@ -392,6 +419,11 @@ fn TransactionForm(id: Option<i32>) -> Element {
                                 loan_id:     *selected_loan_id.read(),
                                 frequency:      frequency.read().as_ref().map(|f| f.as_str().to_string()),
                                 recurring_till: if recurring_till.read().is_empty() { None } else { Some(recurring_till.read().clone()) },
+                                to_account:  if tx_type.read().clone() == TransactionType::Transfer {
+                                                 (*selected_to_acct_id.read()).map(|a| a as i16)
+                                             } else {
+                                                 None
+                                             },
                             };
                             if is_edit {
                                 let _ = tx_repo::update(&db, &tx);
