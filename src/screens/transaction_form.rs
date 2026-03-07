@@ -1,8 +1,11 @@
-use dioxus::prelude::*;
-use chrono::{Local, NaiveDate, NaiveTime};
 use crate::db::DbConnection;
-use crate::models::model::{Account, Category, Goals, Loans, TransactionType, Transactions};
-use crate::repository::{accounts as acct_repo, categories as cat_repo, goals as goal_repo, loans as loan_repo, transactions as tx_repo};
+use crate::models::model::{Account, BillingCycle, Category, Goals, Loans, TransactionType, Transactions};
+use crate::repository::{
+    accounts as acct_repo, categories as cat_repo, goals as goal_repo, loans as loan_repo,
+    transactions as tx_repo,
+};
+use chrono::{Local, NaiveDate, NaiveTime};
+use dioxus::prelude::*;
 
 #[component]
 pub fn AddTransaction() -> Element {
@@ -20,37 +23,39 @@ const TAGS: &[&str] = &["LOAN", "GOAL", "SAVINGS", "RECURRING"];
 fn TransactionForm(id: Option<i32>) -> Element {
     let db = use_context::<DbConnection>();
 
-    let mut amount        = use_signal(String::new);
-    let mut tx_type       = use_signal(|| TransactionType::Expense);
-    let mut selected_cat_id:  Signal<i32> = use_signal(|| 0);
+    let mut amount = use_signal(String::new);
+    let mut tx_type = use_signal(|| TransactionType::Expense);
+    let mut selected_cat_id: Signal<i32> = use_signal(|| 0);
     let mut selected_acct_id: Signal<i32> = use_signal(|| 0);
     let mut selected_tags: Signal<Vec<usize>> = use_signal(Vec::new);
-    let mut title         = use_signal(String::new);
-    let mut note          = use_signal(String::new);
-    let mut cat_drawer    = use_signal(|| false);
-    let mut tx_date       = use_signal(|| Local::now().date_naive());
-    let mut tx_time       = use_signal(|| Local::now().time());
+    let mut title = use_signal(String::new);
+    let mut note = use_signal(String::new);
+    let mut cat_drawer = use_signal(|| false);
+    let mut tx_date = use_signal(|| Local::now().date_naive());
+    let mut tx_time = use_signal(|| Local::now().time());
 
     let mut categories: Signal<Vec<Category>> = use_signal(Vec::new);
-    let mut accounts:   Signal<Vec<Account>>  = use_signal(Vec::new);
-    let mut goals:      Signal<Vec<Goals>>    = use_signal(Vec::new);
-    let mut loans:      Signal<Vec<Loans>>    = use_signal(Vec::new);
+    let mut accounts: Signal<Vec<Account>> = use_signal(Vec::new);
+    let mut goals: Signal<Vec<Goals>> = use_signal(Vec::new);
+    let mut loans: Signal<Vec<Loans>> = use_signal(Vec::new);
     let mut selected_goal_id: Signal<Option<i32>> = use_signal(|| None);
     let mut selected_loan_id: Signal<Option<i32>> = use_signal(|| None);
-    let mut frequency:      Signal<Option<String>> = use_signal(|| None);
-    let mut recurring_till: Signal<String>         = use_signal(String::new);
+    let mut frequency: Signal<Option<BillingCycle>> = use_signal(|| None);
+    let mut recurring_till: Signal<String> = use_signal(String::new);
 
     let is_edit = id.is_some();
-    let nav     = use_navigator();
+    let nav = use_navigator();
     let mut initialized = use_signal(|| false);
 
     {
         let db = db.clone();
         use_effect(move || {
-            if *initialized.read() { return; }
+            if *initialized.read() {
+                return;
+            }
             initialized.set(true);
 
-            let loaded_cats  = cat_repo::get_all(&db).unwrap_or_default();
+            let loaded_cats = cat_repo::get_all(&db).unwrap_or_default();
             let loaded_accts = acct_repo::get_all(&db).unwrap_or_default();
             let loaded_goals = goal_repo::get_all(&db).unwrap_or_default();
             let loaded_loans = loan_repo::get_all(&db).unwrap_or_default();
@@ -76,11 +81,13 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     tx_time.set(tx.tx_time);
                     selected_goal_id.set(tx.goal_id);
                     selected_loan_id.set(tx.loan_id);
-                    frequency.set(tx.frequency.clone());
+                    frequency.set(tx.frequency.as_deref().and_then(BillingCycle::from_str));
                     recurring_till.set(tx.recurring_till.clone().unwrap_or_default());
                     if tx.frequency.is_some() {
                         let mut t = selected_tags.write();
-                        if !t.contains(&3) { t.push(3); }
+                        if !t.contains(&3) {
+                            t.push(3);
+                        }
                     }
                 }
             }
@@ -98,12 +105,18 @@ fn TransactionForm(id: Option<i32>) -> Element {
     let cat_icon = {
         let cats = categories.read();
         let id = *selected_cat_id.read();
-        cats.iter().find(|c| c.id == id).map(|c| c.icon.clone()).unwrap_or_default()
+        cats.iter()
+            .find(|c| c.id == id)
+            .map(|c| c.icon.clone())
+            .unwrap_or_default()
     };
     let cat_label = {
         let cats = categories.read();
         let id = *selected_cat_id.read();
-        cats.iter().find(|c| c.id == id).map(|c| c.name.to_uppercase()).unwrap_or_else(|| "SELECT".to_string())
+        cats.iter()
+            .find(|c| c.id == id)
+            .map(|c| c.name.to_uppercase())
+            .unwrap_or_else(|| "SELECT".to_string())
     };
 
     rsx! {
@@ -251,11 +264,13 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     p { class: "txform-section-label", "FREQUENCY" }
                     div {
                         class: "chip-row",
-                        for freq in ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"] {
+                        for cycle in BillingCycle::all() {
+                            let label = cycle.as_str();
+                            let cycle = cycle.clone();
                             button {
-                                class: if *frequency.read() == Some(freq.to_string()) { "chip chip--on" } else { "chip" },
-                                onclick: move |_| frequency.set(Some(freq.to_string())),
-                                "{freq}"
+                                class: if *frequency.read() == Some(cycle.clone()) { "chip chip--on" } else { "chip" },
+                                onclick: move |_| frequency.set(Some(cycle.clone())),
+                                "{label}"
                             }
                         }
                     }
@@ -340,6 +355,21 @@ fn TransactionForm(id: Option<i32>) -> Element {
 
             div {
                 class: "txform-footer",
+                if is_edit {
+                    button {
+                        class: "txform-delete",
+                        onclick: {
+                            let db = db.clone();
+                            move |_| {
+                                if let Some(edit_id) = id {
+                                    let _ = tx_repo::delete(&db, edit_id);
+                                }
+                                nav.go_back();
+                            }
+                        },
+                        "Delete"
+                    }
+                }
                 button {
                     class: "txform-submit",
                     onclick: {
@@ -358,7 +388,7 @@ fn TransactionForm(id: Option<i32>) -> Element {
                                 description: note.read().clone(),
                                 goal_id:     *selected_goal_id.read(),
                                 loan_id:     *selected_loan_id.read(),
-                                frequency:      frequency.read().clone(),
+                                frequency:      frequency.read().as_ref().map(|f| f.as_str().to_string()),
                                 recurring_till: if recurring_till.read().is_empty() { None } else { Some(recurring_till.read().clone()) },
                             };
                             if is_edit {

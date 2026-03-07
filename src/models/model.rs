@@ -36,11 +36,37 @@ pub struct Loans {
     pub is_lender: bool
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BillingCycle {
+    Daily,
     Weekly,
     Monthly,
     Yearly,
+}
+
+impl BillingCycle {
+    pub fn all() -> &'static [BillingCycle] {
+        &[BillingCycle::Daily, BillingCycle::Weekly, BillingCycle::Monthly, BillingCycle::Yearly]
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            BillingCycle::Daily   => "DAILY",
+            BillingCycle::Weekly  => "WEEKLY",
+            BillingCycle::Monthly => "MONTHLY",
+            BillingCycle::Yearly  => "YEARLY",
+        }
+    }
+
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "DAILY"   => Some(BillingCycle::Daily),
+            "WEEKLY"  => Some(BillingCycle::Weekly),
+            "MONTHLY" => Some(BillingCycle::Monthly),
+            "YEARLY"  => Some(BillingCycle::Yearly),
+            _         => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
