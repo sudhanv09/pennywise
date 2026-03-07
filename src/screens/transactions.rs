@@ -1,19 +1,10 @@
 use dioxus::prelude::*;
 use chrono::{Duration, Local, Datelike, NaiveDate};
+use std::collections::HashMap;
 use crate::db::DbConnection;
 use crate::models::model::{TransactionType, Transactions as TransactionModel};
-use crate::repository::transactions as tx_repo;
+use crate::repository::{transactions as tx_repo, categories as cat_repo};
 use crate::Route;
-
-// Category icons seeded in order; DB ids are 1-based so id-1 = array index.
-const CATEGORY_ICONS: &[&str] = &[
-    "🍔", "🚌", "🛍", "💊", "🎬", "🏠", "✈️", "📚", "🎁",
-];
-
-fn category_icon(id: i16) -> &'static str {
-    let idx = (id as usize).saturating_sub(1);
-    CATEGORY_ICONS.get(idx).copied().unwrap_or("💸")
-}
 
 fn month_name(m: u32) -> &'static str {
     match m {
@@ -35,7 +26,7 @@ struct TxRow {
     id:        i32,
     title:     String,
     amount:    f32,
-    icon:      &'static str,
+    icon:      String,
     is_income: bool,
 }
 
@@ -126,6 +117,13 @@ fn expand_recurring(tx: &TransactionModel, year: i32, month: u32) -> Vec<Transac
 }
 
 fn build_groups(month: u32, year: i32, db: &DbConnection) -> Vec<DayGroup> {
+    // Build category id → icon map
+    let cat_map: HashMap<i16, String> = cat_repo::get_all(db)
+        .unwrap_or_default()
+        .into_iter()
+        .map(|c| (c.id as i16, c.icon))
+        .collect();
+
     // Non-recurring transactions for this month
     let mut all_txs = tx_repo::get_by_month(db, month, year).unwrap_or_default();
 
@@ -148,7 +146,7 @@ fn build_groups(month: u32, year: i32, db: &DbConnection) -> Vec<DayGroup> {
             id:        tx.id,
             title:     if tx.title.is_empty() { tx.description.clone() } else { tx.title.clone() },
             amount:    signed,
-            icon:      category_icon(tx.category),
+            icon:      cat_map.get(&tx.category).cloned().unwrap_or_else(|| "circle".to_string()),
             is_income,
         };
         if let Some(g) = groups.last_mut().filter(|g| g.date_label == label) {
@@ -243,7 +241,7 @@ pub fn Transactions() -> Element {
                                 let id = tx.id;
                                 move |_| { nav.push(Route::EditTransaction { id }); }
                             },
-                            div { class: "tx-icon", "{tx.icon}" }
+                            div { class: "tx-icon", i { class: "icon-{tx.icon}" } }
                             span { class: "tx-title", "{tx.title}" }
                             span { class: "tx-dots" }
                             span {

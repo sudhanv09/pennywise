@@ -207,7 +207,7 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     button {
                         class: "cat-pill",
                         onclick: move |_| cat_drawer.set(true),
-                        span { "{cat_icon}" }
+                        i { class: "icon-{cat_icon}" }
                         span { "{cat_label}" }
                         span { class: "cat-pill-arrow", "›" }
                     }
@@ -461,7 +461,7 @@ fn TransactionForm(id: Option<i32>) -> Element {
                                 selected_cat_id.set(cat_id);
                                 cat_drawer.set(false);
                             },
-                            span { class: "cat-icon", "{cat_icon}" }
+                            i { class: "cat-icon icon-{cat_icon}" }
                             span { class: "cat-label", "{cat_name}" }
                         }
                     }
