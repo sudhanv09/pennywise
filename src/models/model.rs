@@ -80,8 +80,12 @@ pub enum TransactionType {
 pub struct Subscription {
     pub id: i32,
     pub name: String,
+    pub amount: f32,
     pub billing_cycle: BillingCycle,
-    pub next_billing: f32,
+    pub start_date: String,
+    pub end_date: String,
+    pub category_id: i32,
+    pub account_id: i32,
 }
 
 #[derive(Debug, Clone)]
@@ -100,4 +104,5 @@ pub struct Transactions {
     pub frequency: Option<String>,
     pub recurring_till: Option<String>,
     pub to_account: Option<i16>,
+    pub subscription_id: Option<i32>,
 }

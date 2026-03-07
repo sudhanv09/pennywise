@@ -4,5 +4,6 @@ pub mod goals;
 pub mod home;
 pub mod loans;
 pub mod settings;
+pub mod subscriptions;
 pub mod transaction_form;
 pub mod transactions;

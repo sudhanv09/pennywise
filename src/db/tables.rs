@@ -36,8 +36,12 @@ pub fn create_all(conn: &Connection) -> Result<()> {
         CREATE TABLE IF NOT EXISTS subscriptions (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
             name          TEXT NOT NULL,
+            amount        REAL NOT NULL,
             billing_cycle TEXT NOT NULL,
-            next_billing  REAL NOT NULL
+            start_date    TEXT NOT NULL,
+            end_date      TEXT NOT NULL,
+            category_id   INTEGER NOT NULL,
+            account_id    INTEGER NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS transactions (
@@ -64,5 +68,6 @@ pub fn create_all(conn: &Connection) -> Result<()> {
 pub fn migrate(conn: &Connection) -> Result<()> {
     // Idempotent: SQLite errors if column already exists; we ignore that.
     conn.execute("ALTER TABLE transactions ADD COLUMN to_account INTEGER", []).ok();
+    conn.execute("ALTER TABLE transactions ADD COLUMN subscription_id INTEGER", []).ok();
     Ok(())
 }

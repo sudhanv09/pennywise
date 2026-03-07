@@ -15,6 +15,7 @@ use screens::{
     categories::Categories,
     goals::Goals,
     loans::Loans,
+    subscriptions::Subscriptions,
     transaction_form::{AddTransaction, EditTransaction},
     transactions::Transactions,
 };
@@ -46,6 +47,8 @@ enum Route {
     Goals,
     #[route("/settings/loans")]
     Loans,
+    #[route("/settings/subscriptions")]
+    Subscriptions,
 }
 
 #[component]

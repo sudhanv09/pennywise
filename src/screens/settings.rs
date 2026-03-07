@@ -41,6 +41,12 @@ pub fn Settings() -> Element {
                     i { class: "settings-grid-icon icon-handshake" }
                     span { class: "settings-grid-label", "Loans" }
                 }
+                button {
+                    class: "settings-grid-card",
+                    onclick: move |_| { nav.push(Route::Subscriptions {}); },
+                    i { class: "settings-grid-icon icon-repeat" }
+                    span { class: "settings-grid-label", "Subscriptions" }
+                }
             }
         }
     }

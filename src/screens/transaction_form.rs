@@ -424,6 +424,7 @@ fn TransactionForm(id: Option<i32>) -> Element {
                                              } else {
                                                  None
                                              },
+                                subscription_id: None,
                             };
                             if is_edit {
                                 let _ = tx_repo::update(&db, &tx);
