@@ -69,4 +69,6 @@ pub struct Transactions {
     pub category: i16,
     pub account: i16,
     pub description: String,
+    pub goal_id: Option<i32>,
+    pub loan_id: Option<i32>,
 }

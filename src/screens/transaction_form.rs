@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 use chrono::{Local, NaiveDate, NaiveTime};
 use crate::db::DbConnection;
-use crate::models::model::{Account, Category, TransactionType, Transactions};
-use crate::repository::{accounts as acct_repo, categories as cat_repo, transactions as tx_repo};
+use crate::models::model::{Account, Category, Goals, Loans, TransactionType, Transactions};
+use crate::repository::{accounts as acct_repo, categories as cat_repo, goals as goal_repo, loans as loan_repo, transactions as tx_repo};
 
 #[component]
 pub fn AddTransaction() -> Element {
@@ -33,6 +33,10 @@ fn TransactionForm(id: Option<i32>) -> Element {
 
     let mut categories: Signal<Vec<Category>> = use_signal(Vec::new);
     let mut accounts:   Signal<Vec<Account>>  = use_signal(Vec::new);
+    let mut goals:      Signal<Vec<Goals>>    = use_signal(Vec::new);
+    let mut loans:      Signal<Vec<Loans>>    = use_signal(Vec::new);
+    let mut selected_goal_id: Signal<Option<i32>> = use_signal(|| None);
+    let mut selected_loan_id: Signal<Option<i32>> = use_signal(|| None);
 
     let is_edit = id.is_some();
     let nav     = use_navigator();
@@ -42,6 +46,8 @@ fn TransactionForm(id: Option<i32>) -> Element {
         use_effect(move || {
             let loaded_cats  = cat_repo::get_all(&db).unwrap_or_default();
             let loaded_accts = acct_repo::get_all(&db).unwrap_or_default();
+            let loaded_goals = goal_repo::get_all(&db).unwrap_or_default();
+            let loaded_loans = loan_repo::get_all(&db).unwrap_or_default();
 
             // Set defaults from first items
             if !loaded_cats.is_empty() && *selected_cat_id.read() == 0 {
@@ -62,11 +68,15 @@ fn TransactionForm(id: Option<i32>) -> Element {
                     note.set(tx.description);
                     tx_date.set(tx.tx_date);
                     tx_time.set(tx.tx_time);
+                    selected_goal_id.set(tx.goal_id);
+                    selected_loan_id.set(tx.loan_id);
                 }
             }
 
             categories.set(loaded_cats);
             accounts.set(loaded_accts);
+            goals.set(loaded_goals);
+            loans.set(loaded_loans);
         });
     }
 
@@ -217,6 +227,62 @@ fn TransactionForm(id: Option<i32>) -> Element {
                 }
             }
 
+            if !goals.read().is_empty() {
+                div {
+                    class: "txform-section",
+                    p { class: "txform-section-label", "GOAL" }
+                    div {
+                        class: "chip-row",
+                        button {
+                            class: if selected_goal_id.read().is_none() { "chip chip--on" } else { "chip" },
+                            onclick: move |_| selected_goal_id.set(None),
+                            "NONE"
+                        }
+                        {goals.read().iter().map(|g| {
+                            let gid  = g.id;
+                            let name = g.name.to_uppercase();
+                            let selected = *selected_goal_id.read() == Some(gid);
+                            rsx! {
+                                button {
+                                    key: "{gid}",
+                                    class: if selected { "chip chip--on" } else { "chip" },
+                                    onclick: move |_| selected_goal_id.set(Some(gid)),
+                                    "{name}"
+                                }
+                            }
+                        })}
+                    }
+                }
+            }
+
+            if !loans.read().is_empty() {
+                div {
+                    class: "txform-section",
+                    p { class: "txform-section-label", "LOAN" }
+                    div {
+                        class: "chip-row",
+                        button {
+                            class: if selected_loan_id.read().is_none() { "chip chip--on" } else { "chip" },
+                            onclick: move |_| selected_loan_id.set(None),
+                            "NONE"
+                        }
+                        {loans.read().iter().map(|l| {
+                            let lid  = l.id;
+                            let name = l.name.to_uppercase();
+                            let selected = *selected_loan_id.read() == Some(lid);
+                            rsx! {
+                                button {
+                                    key: "{lid}",
+                                    class: if selected { "chip chip--on" } else { "chip" },
+                                    onclick: move |_| selected_loan_id.set(Some(lid)),
+                                    "{name}"
+                                }
+                            }
+                        })}
+                    }
+                }
+            }
+
             div {
                 class: "txform-section",
                 input {
@@ -246,6 +312,8 @@ fn TransactionForm(id: Option<i32>) -> Element {
                                 category:    *selected_cat_id.read() as i16,
                                 account:     *selected_acct_id.read() as i16,
                                 description: note.read().clone(),
+                                goal_id:     *selected_goal_id.read(),
+                                loan_id:     *selected_loan_id.read(),
                             };
                             if is_edit {
                                 let _ = tx_repo::update(&db, &tx);

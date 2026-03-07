@@ -104,11 +104,6 @@ pub fn Transactions() -> Element {
             div {
                 class: "ledger-header",
                 h1 { class: "ledger-title", "THE LEDGER" }
-                div {
-                    class: "ledger-actions",
-                    button { class: "ledger-icon-btn", "⌕" }
-                    button { class: "ledger-icon-btn", "⚌" }
-                }
             }
 
             div {

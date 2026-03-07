@@ -49,7 +49,11 @@ pub fn create_all(conn: &Connection) -> Result<()> {
             tx_type     TEXT    NOT NULL,
             category    INTEGER NOT NULL,
             account     INTEGER NOT NULL,
-            description TEXT    NOT NULL
+            description TEXT    NOT NULL,
+            goal_id     INTEGER,
+            loan_id     INTEGER
         );
-    ")
+    ")?;
+
+    Ok(())
 }
