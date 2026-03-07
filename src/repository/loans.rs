@@ -74,3 +74,22 @@ pub fn delete(db: &DbConnection, id: i32) -> Result<()> {
     conn.execute("DELETE FROM loans WHERE id = ?1", [id])?;
     Ok(())
 }
+
+/// Returns (total_paid_via_tx, first_payment_date, last_payment_date, payment_count)
+/// for all transactions linked to this loan.
+pub fn payment_stats(db: &DbConnection, loan_id: i32) -> Result<(f32, Option<String>, Option<String>, i64)> {
+    let conn = db.lock().unwrap();
+    conn.query_row(
+        "SELECT COALESCE(SUM(amount), 0), MIN(tx_date), MAX(tx_date), COUNT(*)
+         FROM transactions WHERE loan_id = ?1",
+        [loan_id],
+        |row| {
+            Ok((
+                row.get::<_, f64>(0)? as f32,
+                row.get::<_, Option<String>>(1)?,
+                row.get::<_, Option<String>>(2)?,
+                row.get::<_, i64>(3)?,
+            ))
+        },
+    )
+}
