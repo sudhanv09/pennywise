@@ -15,43 +15,31 @@ pub fn Settings() -> Element {
             }
 
             div {
-                class: "settings-menu",
+                class: "settings-grid",
 
                 button {
-                    class: "settings-menu-row",
+                    class: "settings-grid-card",
                     onclick: move |_| { nav.push(Route::Accounts {}); },
-                    div { class: "settings-menu-left",
-                        span { class: "settings-menu-icon", "💳" }
-                        span { class: "settings-menu-label", "Accounts" }
-                    }
-                    span { class: "settings-row-chevron", "›" }
+                    span { class: "settings-grid-icon", "💳" }
+                    span { class: "settings-grid-label", "Accounts" }
                 }
                 button {
-                    class: "settings-menu-row",
+                    class: "settings-grid-card",
                     onclick: move |_| { nav.push(Route::Categories {}); },
-                    div { class: "settings-menu-left",
-                        span { class: "settings-menu-icon", "🗂" }
-                        span { class: "settings-menu-label", "Categories" }
-                    }
-                    span { class: "settings-row-chevron", "›" }
+                    span { class: "settings-grid-icon", "🗂" }
+                    span { class: "settings-grid-label", "Categories" }
                 }
                 button {
-                    class: "settings-menu-row",
+                    class: "settings-grid-card",
                     onclick: move |_| { nav.push(Route::Goals {}); },
-                    div { class: "settings-menu-left",
-                        span { class: "settings-menu-icon", "🎯" }
-                        span { class: "settings-menu-label", "Goals" }
-                    }
-                    span { class: "settings-row-chevron", "›" }
+                    span { class: "settings-grid-icon", "🎯" }
+                    span { class: "settings-grid-label", "Goals" }
                 }
                 button {
-                    class: "settings-menu-row",
+                    class: "settings-grid-card",
                     onclick: move |_| { nav.push(Route::Loans {}); },
-                    div { class: "settings-menu-left",
-                        span { class: "settings-menu-icon", "🤝" }
-                        span { class: "settings-menu-label", "Loans" }
-                    }
-                    span { class: "settings-row-chevron", "›" }
+                    span { class: "settings-grid-icon", "🤝" }
+                    span { class: "settings-grid-label", "Loans" }
                 }
             }
         }
