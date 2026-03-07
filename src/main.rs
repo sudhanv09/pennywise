@@ -10,6 +10,10 @@ use components::app_dock::AppDock;
 use screens::{
     home::Home,
     settings::Settings,
+    accounts::Accounts,
+    categories::Categories,
+    goals::Goals,
+    loans::Loans,
     transaction_form::{AddTransaction, EditTransaction},
     transactions::Transactions,
 };
@@ -31,6 +35,14 @@ enum Route {
     AddTransaction,
     #[route("/transaction/:id/edit")]
     EditTransaction { id: i32 },
+    #[route("/settings/accounts")]
+    Accounts,
+    #[route("/settings/categories")]
+    Categories,
+    #[route("/settings/goals")]
+    Goals,
+    #[route("/settings/loans")]
+    Loans,
 }
 
 #[component]
