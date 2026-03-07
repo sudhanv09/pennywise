@@ -13,52 +13,67 @@ fn month_expense_from_txs(all_txs: &[Transactions], month: u32, year: i32) -> f3
         NaiveDate::from_ymd_opt(year, month + 1, 1).unwrap()
     };
 
-    all_txs.iter().filter_map(|tx| {
-        if tx.tx_type != TransactionType::Expense { return None; }
-
-        match tx.frequency.as_deref() {
-            None => {
-                // Non-recurring: check if it falls in this month
-                if tx.tx_date >= month_start && tx.tx_date < month_end {
-                    Some(tx.amount)
-                } else {
-                    None
-                }
+    all_txs
+        .iter()
+        .filter_map(|tx| {
+            if tx.tx_type != TransactionType::Expense {
+                return None;
             }
-            Some(freq) => {
-                // Recurring: check if there's an occurrence this month
-                let till = tx.recurring_till.as_deref()
-                    .and_then(|s| NaiveDate::parse_from_str(s, "%Y-%m-%d").ok());
-                let effective_end = match till {
-                    Some(t) if t < month_end => t + Duration::days(1),
-                    _ => month_end,
-                };
-                if tx.tx_date >= effective_end { return None; }
 
-                let has_occurrence = match freq {
-                    "DAILY" => tx.tx_date.max(month_start) < effective_end,
-                    "WEEKLY" => {
-                        let mut d = tx.tx_date;
-                        if d < month_start {
-                            let diff = (month_start - d).num_days();
-                            let weeks = (diff + 6) / 7;
-                            d += Duration::weeks(weeks);
-                        }
-                        d < effective_end
+            match tx.frequency.as_deref() {
+                None => {
+                    // Non-recurring: check if it falls in this month
+                    if tx.tx_date >= month_start && tx.tx_date < month_end {
+                        Some(tx.amount)
+                    } else {
+                        None
                     }
-                    "MONTHLY" => NaiveDate::from_ymd_opt(year, month, tx.tx_date.day())
-                        .map(|d| d >= tx.tx_date && d < effective_end)
-                        .unwrap_or(false),
-                    "YEARLY" => tx.tx_date.month() == month
-                        && NaiveDate::from_ymd_opt(year, month, tx.tx_date.day())
+                }
+                Some(freq) => {
+                    // Recurring: check if there's an occurrence this month
+                    let till = tx
+                        .recurring_till
+                        .as_deref()
+                        .and_then(|s| NaiveDate::parse_from_str(s, "%Y-%m-%d").ok());
+                    let effective_end = match till {
+                        Some(t) if t < month_end => t + Duration::days(1),
+                        _ => month_end,
+                    };
+                    if tx.tx_date >= effective_end {
+                        return None;
+                    }
+
+                    let has_occurrence = match freq {
+                        "DAILY" => tx.tx_date.max(month_start) < effective_end,
+                        "WEEKLY" => {
+                            let mut d = tx.tx_date;
+                            if d < month_start {
+                                let diff = (month_start - d).num_days();
+                                let weeks = (diff + 6) / 7;
+                                d += Duration::weeks(weeks);
+                            }
+                            d < effective_end
+                        }
+                        "MONTHLY" => NaiveDate::from_ymd_opt(year, month, tx.tx_date.day())
                             .map(|d| d >= tx.tx_date && d < effective_end)
                             .unwrap_or(false),
-                    _ => false,
-                };
-                if has_occurrence { Some(tx.amount) } else { None }
+                        "YEARLY" => {
+                            tx.tx_date.month() == month
+                                && NaiveDate::from_ymd_opt(year, month, tx.tx_date.day())
+                                    .map(|d| d >= tx.tx_date && d < effective_end)
+                                    .unwrap_or(false)
+                        }
+                        _ => false,
+                    };
+                    if has_occurrence {
+                        Some(tx.amount)
+                    } else {
+                        None
+                    }
+                }
             }
-        }
-    }).sum()
+        })
+        .sum()
 }
 
 #[component]
@@ -74,18 +89,23 @@ pub fn Home() -> Element {
     {
         let db = db.clone();
         use_effect(move || {
-            if *initialized.read() { return; }
+            if *initialized.read() {
+                return;
+            }
             initialized.set(true);
 
             let accts = acct_repo::get_all(&db).unwrap_or_default();
             let all_txs = tx_repo::get_all(&db).unwrap_or_default();
 
             let base: f32 = accts.iter().map(|a| a.starting_balance).sum();
-            let net: f32 = all_txs.iter().map(|tx| match tx.tx_type {
-                TransactionType::Income   =>  tx.amount,
-                TransactionType::Expense  => -tx.amount,
-                TransactionType::Transfer =>  0.0,
-            }).sum();
+            let net: f32 = all_txs
+                .iter()
+                .map(|tx| match tx.tx_type {
+                    TransactionType::Income => tx.amount,
+                    TransactionType::Expense => -tx.amount,
+                    TransactionType::Transfer => 0.0,
+                })
+                .sum();
             balance.set(base + net);
 
             let month_burn = month_expense_from_txs(&all_txs, now.month(), now.year());
@@ -138,28 +158,28 @@ pub fn Home() -> Element {
                     class: "action-card action-card--primary",
                     style: "animation-delay: 0ms",
                     onclick: move |_| { nav.push(Route::AddTransaction); },
-                    div { class: "card-glyph", "+" }
+                    div { class: "card-glyph icon-plus" }
                     span { class: "card-label", "ADD" }
                 }
                 button {
                     class: "action-card",
                     style: "animation-delay: 60ms",
                     onclick: move |_| { nav.push(Route::AddTransaction); },
-                    div { class: "card-glyph", "⇄" }
+                    div { class: "card-glyph icon-arrow-right-left" }
                     span { class: "card-label", "TRANSFER" }
                 }
                 button {
                     class: "action-card",
                     style: "animation-delay: 120ms",
                     onclick: move |_| { nav.push(Route::Transactions); },
-                    div { class: "card-glyph", "≡" }
+                    div { class: "card-glyph icon-list" }
                     span { class: "card-label", "LEDGER" }
                 }
                 button {
                     class: "action-card",
                     style: "animation-delay: 180ms",
                     onclick: move |_| { nav.push(Route::Settings); },
-                    div { class: "card-glyph", "◎" }
+                    div { class: "card-glyph icon-settings" }
                     span { class: "card-label", "SETTINGS" }
                 }
             }

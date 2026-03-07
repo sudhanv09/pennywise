@@ -1,5 +1,5 @@
-use dioxus::prelude::*;
 use crate::Route;
+use dioxus::prelude::*;
 
 #[component]
 pub fn Settings() -> Element {
@@ -20,25 +20,25 @@ pub fn Settings() -> Element {
                 button {
                     class: "settings-grid-card",
                     onclick: move |_| { nav.push(Route::Accounts {}); },
-                    span { class: "settings-grid-icon", "💳" }
+                    i { class: "settings-grid-icon icon-credit-card" }
                     span { class: "settings-grid-label", "Accounts" }
                 }
                 button {
                     class: "settings-grid-card",
                     onclick: move |_| { nav.push(Route::Categories {}); },
-                    span { class: "settings-grid-icon", "🗂" }
+                    i { class: "settings-grid-icon icon-tags" }
                     span { class: "settings-grid-label", "Categories" }
                 }
                 button {
                     class: "settings-grid-card",
                     onclick: move |_| { nav.push(Route::Goals {}); },
-                    span { class: "settings-grid-icon", "🎯" }
+                    i { class: "settings-grid-icon icon-target" }
                     span { class: "settings-grid-label", "Goals" }
                 }
                 button {
                     class: "settings-grid-card",
                     onclick: move |_| { nav.push(Route::Loans {}); },
-                    span { class: "settings-grid-icon", "🤝" }
+                    i { class: "settings-grid-icon icon-handshake" }
                     span { class: "settings-grid-label", "Loans" }
                 }
             }
