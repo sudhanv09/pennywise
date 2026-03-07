@@ -1,8 +1,8 @@
 use chrono::{Datelike, NaiveDate};
 use dioxus::prelude::*;
-use crate::db::DbConnection;
-use crate::models::model::Goals as GoalModel;
-use crate::repository::goals as repo;
+use pennywise::db::DbConnection;
+use pennywise::models::model::Goals as GoalModel;
+use pennywise::repository::{goals as repo, transactions as tx_repo};
 
 fn days_to_date_str(days: f32) -> String {
     NaiveDate::from_num_days_from_ce_opt(days as i32)
@@ -27,7 +27,6 @@ pub fn Goals() -> Element {
 
     let mut f_name     = use_signal(String::new);
     let mut f_target   = use_signal(String::new);
-    let mut f_current  = use_signal(String::new);
     let mut f_deadline = use_signal(String::new);
 
     {
@@ -42,7 +41,6 @@ pub fn Goals() -> Element {
     let open_new = move |_| {
         f_name.set(String::new());
         f_target.set(String::new());
-        f_current.set(String::new());
         f_deadline.set(String::new());
         editing_id.set(-1);
         drawer_open.set(true);
@@ -72,26 +70,44 @@ pub fn Goals() -> Element {
                 {items.read().iter().map(|g| {
                     let id   = g.id;
                     let name = g.name.clone();
-                    let pct  = if g.target > 0.0 { (g.current / g.target * 100.0) as u32 } else { 0 };
-                    let sub  = format!("${:.0} / ${:.0}  •  {}%", g.current, g.target, pct);
-                    let g    = g.clone();
+                    let current = tx_repo::sum_for_goal(&db, id).unwrap_or(0.0);
+                    let pct  = if g.target > 0.0 { (current / g.target * 100.0).min(100.0) } else { 0.0 };
+                    let sub  = format!("${:.0} / ${:.0}", current, g.target);
+                    let pct_str   = format!("{:.0}%", pct);
+                    let pct_width = format!("{}%", pct as u32);
+                    let bar_class = if pct >= 100.0 { "loan-bar-fill loan-bar-fill--done" } else { "loan-bar-fill" };
+                    let status = if pct >= 100.0 { "REACHED" } else { "" };
+                    let status_class = if pct >= 100.0 { "loan-status loan-status--done" } else { "loan-status" };
+                    let g = g.clone();
                     rsx! {
                         button {
                             key: "{id}",
-                            class: "settings-row",
+                            class: "loan-card",
                             onclick: move |_| {
                                 f_name.set(g.name.clone());
                                 f_target.set(format!("{:.2}", g.target));
-                                f_current.set(format!("{:.2}", g.current));
                                 f_deadline.set(g.deadline.map(|d| days_to_date_str(d)).unwrap_or_default());
                                 editing_id.set(id);
                                 drawer_open.set(true);
                             },
-                            div { class: "settings-row-main",
-                                span { class: "settings-row-label", "{name}" }
-                                span { class: "settings-row-sub", "{sub}" }
+                            div { class: "loan-card-top",
+                                div { class: "settings-row-main",
+                                    span { class: "settings-row-label", "{name}" }
+                                    span { class: "settings-row-sub", "{sub}" }
+                                }
+                                span { class: "settings-row-chevron", "›" }
                             }
-                            span { class: "settings-row-chevron", "›" }
+                            div { class: "loan-bar-row",
+                                div { class: "loan-bar",
+                                    div { class: "{bar_class}", style: "width: {pct_width}" }
+                                }
+                                span { class: "loan-pct", "{pct_str}" }
+                            }
+                            if !status.is_empty() {
+                                div { class: "loan-insights",
+                                    span { class: "{status_class}", "{status}" }
+                                }
+                            }
                         }
                     }
                 })}
@@ -122,14 +138,6 @@ pub fn Goals() -> Element {
                         class: "drawer-input", r#type: "number", step: "0.01", placeholder: "0.00",
                         value: "{f_target}",
                         oninput: move |e| f_target.set(e.value()),
-                    }
-                }
-                div { class: "drawer-field",
-                    label { "CURRENT" }
-                    input {
-                        class: "drawer-input", r#type: "number", step: "0.01", placeholder: "0.00",
-                        value: "{f_current}",
-                        oninput: move |e| f_current.set(e.value()),
                     }
                 }
                 div { class: "drawer-field",
@@ -166,7 +174,7 @@ pub fn Goals() -> Element {
                                 id,
                                 name:     f_name.read().clone(),
                                 target:   f_target.read().parse().unwrap_or(0.0),
-                                current:  f_current.read().parse().unwrap_or(0.0),
+                                current:  0.0,
                                 deadline: date_str_to_days(&f_deadline.read()),
                             };
                             if id == -1 { let _ = repo::insert(&db, &item); }
