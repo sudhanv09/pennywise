@@ -2,6 +2,7 @@ use dioxus::prelude::*;
 
 mod components;
 mod db;
+mod icons;
 mod models;
 mod repository;
 mod screens;
