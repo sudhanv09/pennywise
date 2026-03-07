@@ -212,7 +212,7 @@ pub fn Transactions() -> Element {
             div {
                 class: "mtd-row",
                 span { class: "mtd-label", "{cur_mn} {cur_yr} MTD:" }
-                span { class: "{mtd_class}", "{mtd_sign}${mtd_total:.2}" }
+                span { class: "{mtd_class}", "${mtd_total:.2}" }
             }
 
             div {
