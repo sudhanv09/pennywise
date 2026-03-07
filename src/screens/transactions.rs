@@ -1,9 +1,9 @@
 use dioxus::prelude::*;
 use chrono::{Duration, Local, Datelike, NaiveDate};
 use std::collections::HashMap;
-use crate::db::DbConnection;
-use crate::models::model::{TransactionType, Transactions as TransactionModel};
-use crate::repository::{transactions as tx_repo, categories as cat_repo};
+use pennywise::db::DbConnection;
+use pennywise::models::model::{TransactionType, Transactions as TransactionModel};
+use pennywise::repository::{transactions as tx_repo, categories as cat_repo};
 use crate::Route;
 
 fn month_name(m: u32) -> &'static str {

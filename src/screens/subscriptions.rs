@@ -1,8 +1,8 @@
 use chrono::Local;
 use dioxus::prelude::*;
-use crate::db::DbConnection;
-use crate::models::model::{Account, BillingCycle, Category, Subscription};
-use crate::repository::{
+use pennywise::db::DbConnection;
+use pennywise::models::model::{Account, BillingCycle, Category, Subscription};
+use pennywise::repository::{
     accounts as acct_repo, categories as cat_repo,
     subscriptions as repo, transactions as tx_repo,
 };

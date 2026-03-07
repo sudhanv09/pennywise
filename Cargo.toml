@@ -6,17 +6,25 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "pennywise"
+path = "src/lib.rs"
+
+[[bin]]
+name = "pennywise"
+path = "src/main.rs"
+
 [dependencies]
 cache-dir = "0.1.9"
 chrono = "0.4.44"
-dioxus = { version = "0.7.1", features = ["router"] }
-rusqlite = { version = "0.38.0", features = ["bundled"], optional=true }
+dioxus = { version = "0.7.1", features = ["router"], optional = true }
+rusqlite = { version = "0.38.0", features = ["bundled"] }
 
 [features]
 default = ["mobile"]
-web = ["dioxus/web"]
-desktop = ["dioxus/desktop"]
-mobile = ["dioxus/mobile", "dep:rusqlite"]
+web = ["dep:dioxus", "dioxus/web"]
+desktop = ["dep:dioxus", "dioxus/desktop"]
+mobile = ["dep:dioxus", "dioxus/mobile"]
 
 [profile.android-dev]
 inherits = "dev"

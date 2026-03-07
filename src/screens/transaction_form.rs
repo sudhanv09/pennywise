@@ -1,6 +1,6 @@
-use crate::db::DbConnection;
-use crate::models::model::{Account, BillingCycle, Category, Goals, Loans, TransactionType, Transactions};
-use crate::repository::{
+use pennywise::db::DbConnection;
+use pennywise::models::model::{Account, BillingCycle, Category, Goals, Loans, TransactionType, Transactions};
+use pennywise::repository::{
     accounts as acct_repo, categories as cat_repo, goals as goal_repo, loans as loan_repo,
     transactions as tx_repo,
 };

@@ -1,7 +1,7 @@
 use crate::components::icon_picker::IconPicker;
-use crate::db::DbConnection;
-use crate::models::model::Account;
-use crate::repository::accounts as repo;
+use pennywise::db::DbConnection;
+use pennywise::models::model::Account;
+use pennywise::repository::accounts as repo;
 use dioxus::prelude::*;
 
 #[component]

@@ -1,10 +1,8 @@
 use dioxus::prelude::*;
+use pennywise::db;
 
 mod components;
-mod db;
 mod icons;
-mod models;
-mod repository;
 mod screens;
 
 use components::app_dock::AppDock;

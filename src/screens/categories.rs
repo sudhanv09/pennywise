@@ -1,8 +1,8 @@
 use dioxus::prelude::*;
 use crate::components::icon_picker::IconPicker;
-use crate::db::DbConnection;
-use crate::models::model::Category;
-use crate::repository::categories as repo;
+use pennywise::db::DbConnection;
+use pennywise::models::model::Category;
+use pennywise::repository::categories as repo;
 
 #[component]
 pub fn Categories() -> Element {

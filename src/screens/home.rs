@@ -1,6 +1,6 @@
-use crate::db::DbConnection;
-use crate::models::model::{TransactionType, Transactions};
-use crate::repository::{accounts as acct_repo, transactions as tx_repo};
+use pennywise::db::DbConnection;
+use pennywise::models::model::{TransactionType, Transactions};
+use pennywise::repository::{accounts as acct_repo, transactions as tx_repo};
 use crate::Route;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use dioxus::prelude::*;
