@@ -142,18 +142,20 @@ fn build_groups(month: u32, year: i32, db: &DbConnection) -> Vec<DayGroup> {
     let mut groups: Vec<DayGroup> = Vec::new();
     for tx in all_txs {
         let label = tx.tx_date.format("%b %-d, %Y").to_string().to_uppercase();
+        let is_income = tx.tx_type == TransactionType::Income;
+        let signed = if is_income { tx.amount } else { -tx.amount };
         let row = TxRow {
             id:        tx.id,
             title:     if tx.title.is_empty() { tx.description.clone() } else { tx.title.clone() },
-            amount:    tx.amount,
+            amount:    signed,
             icon:      category_icon(tx.category),
-            is_income: tx.tx_type == TransactionType::Income,
+            is_income,
         };
         if let Some(g) = groups.last_mut().filter(|g| g.date_label == label) {
-            g.daily_total += tx.amount;
+            g.daily_total += signed;
             g.items.push(row);
         } else {
-            groups.push(DayGroup { date_label: label, daily_total: tx.amount, items: vec![row] });
+            groups.push(DayGroup { date_label: label, daily_total: signed, items: vec![row] });
         }
     }
     groups
@@ -246,10 +248,10 @@ pub fn Transactions() -> Element {
                             span { class: "tx-dots" }
                             span {
                                 class: if tx.is_income { "tx-amount tx-amount--pos" } else { "tx-amount" },
-                                { if tx.is_income {
+                                { if tx.amount >= 0.0 {
                                     format!("+{:.2}", tx.amount)
                                 } else {
-                                    format!("({:.2})", tx.amount.abs())
+                                    format!("{:.2}", tx.amount)
                                 }}
                             }
                         }
