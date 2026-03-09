@@ -191,35 +191,48 @@ a { color: inherit; text-decoration: none; }
     margin-top: 16px;
 }
 
-.burn-pill {
+.month-pills {
     display: flex;
-    align-items: stretch;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xs);
-    overflow: hidden;
-    margin-top: 4px;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
 }
 
+.burn-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    padding: 5px 10px;
+}
+
+.burn-pill--income { border-color: rgba(94, 255, 163, 0.2); }
+.burn-pill--expense { border-color: rgba(255, 91, 91, 0.2); }
+
+.burn-icon {
+    font-size: 12px;
+    line-height: 1;
+}
+
+.burn-pill--income .burn-icon { color: var(--income); }
+.burn-pill--expense .burn-icon { color: var(--expense); }
+
 .burn-value {
-    padding: 5px 12px;
     font-family: var(--font-mono);
     font-size: 12px;
     font-weight: 500;
-    color: var(--expense);
+    color: var(--text-muted);
 }
 
-.burn-sep {
-    width: 1px;
-    background: var(--border);
-}
+.burn-value--income { color: var(--income); }
+.burn-value--expense { color: var(--expense); }
 
 .burn-tag {
-    padding: 5px 12px;
     font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.12em;
+    font-size: 10px;
+    letter-spacing: 0.14em;
     color: var(--text-muted);
-    align-self: center;
 }
 
 /* Action grid */
@@ -270,6 +283,338 @@ a { color: inherit; text-decoration: none; }
     letter-spacing: 0.16em;
     color: var(--text-muted);
 }
+
+/* ── Home Sections ──────────────────────────────────────────── */
+.home-section {
+    padding: 20px 20px 0;
+    opacity: 0;
+    animation: fadeUp 0.4s ease forwards;
+}
+
+.home-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.home-section-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    color: var(--text-muted);
+}
+
+.home-section-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+}
+
+.home-section-link {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: opacity 0.15s;
+}
+
+.home-section-link:active { opacity: 0.6; }
+
+/* ── Spending Pie Chart ───────────────────────────────────── */
+.pie-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 0;
+}
+
+.pie-chart {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.pie-hole {
+    position: absolute;
+    inset: 22px;
+    border-radius: 50%;
+    background: var(--bg);
+}
+
+.pie-legend {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.pie-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pie-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.pie-legend-name {
+    flex: 1;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pie-legend-amt {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+
+/* ── Recent Transactions ──────────────────────────────────── */
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.recent-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.recent-row:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+}
+
+.recent-row:active { background: var(--surface-2); }
+
+.recent-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--border-hi);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--accent);
+    background: var(--surface-2);
+    flex-shrink: 0;
+}
+
+.recent-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.recent-title {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-date {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+}
+
+.recent-amount {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.recent-amount--pos { color: var(--income); }
+
+/* ── Goals Mini Cards ─────────────────────────────────────── */
+.goals-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.goal-mini {
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.goal-mini-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.goal-mini-name {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.goal-mini-pct {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+}
+
+.goal-mini-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--surface-2);
+    overflow: hidden;
+}
+
+.goal-mini-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent);
+    transition: width 0.5s ease;
+}
+
+.goal-mini-fill--done { background: var(--income); }
+
+.goal-mini-amounts {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text);
+    letter-spacing: 0.02em;
+}
+
+.goal-mini-target {
+    color: var(--text-muted);
+}
+
+/* ── Loans Mini Cards ─────────────────────────────────────── */
+.loans-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.loan-mini {
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.loan-mini-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.loan-mini-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.loan-mini-name {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.loan-mini-tag {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(255, 91, 91, 0.1);
+    color: var(--expense);
+    flex-shrink: 0;
+}
+
+.loan-mini-tag--lent {
+    background: rgba(91, 200, 255, 0.1);
+    color: var(--transfer);
+}
+
+.loan-mini-remaining {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+
+.loan-mini-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--surface-2);
+    overflow: hidden;
+}
+
+.loan-mini-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--accent);
+    transition: width 0.5s ease;
+}
+
+.loan-mini-fill--done { background: var(--income); }
 
 .txform {
     min-height: 100vh;

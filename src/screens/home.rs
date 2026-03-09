@@ -1,11 +1,35 @@
 use pennywise::db::DbConnection;
 use pennywise::models::model::{TransactionType, Transactions};
-use pennywise::repository::{accounts as acct_repo, transactions as tx_repo};
-use crate::Route;
+use pennywise::repository::{
+    accounts as acct_repo,
+    categories as cat_repo,
+    goals as goal_repo,
+    loans as loan_repo,
+    transactions as tx_repo,
+};
+use crate::components::balance_hero::BalanceHero;
+use crate::components::spending_chart::{SpendingChart, CatSlice, PIE_COLORS};
+use crate::components::recent_transactions::{RecentTransactions, RecentTx};
+use crate::components::goals_section::{GoalsSection, GoalRow};
+use crate::components::loans_section::{LoansSection, LoanRow};
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use dioxus::prelude::*;
+use std::collections::HashMap;
 
-fn month_expense_from_txs(all_txs: &[Transactions], month: u32, year: i32) -> f32 {
+fn month_name(m: u32) -> &'static str {
+    match m {
+        1 => "JAN", 2 => "FEB", 3  => "MAR", 4  => "APR",
+        5 => "MAY", 6 => "JUN", 7  => "JUL", 8  => "AUG",
+        9 => "SEP", 10 => "OCT", 11 => "NOV", _  => "DEC",
+    }
+}
+
+fn month_sum_by_type(
+    all_txs: &[Transactions],
+    month: u32,
+    year: i32,
+    tx_type: TransactionType,
+) -> f32 {
     let month_start = NaiveDate::from_ymd_opt(year, month, 1).unwrap();
     let month_end = if month == 12 {
         NaiveDate::from_ymd_opt(year + 1, 1, 1).unwrap()
@@ -16,13 +40,12 @@ fn month_expense_from_txs(all_txs: &[Transactions], month: u32, year: i32) -> f3
     all_txs
         .iter()
         .filter_map(|tx| {
-            if tx.tx_type != TransactionType::Expense {
+            if tx.tx_type != tx_type {
                 return None;
             }
 
             match tx.frequency.as_deref() {
                 None => {
-                    // Non-recurring: check if it falls in this month
                     if tx.tx_date >= month_start && tx.tx_date < month_end {
                         Some(tx.amount)
                     } else {
@@ -30,7 +53,6 @@ fn month_expense_from_txs(all_txs: &[Transactions], month: u32, year: i32) -> f3
                     }
                 }
                 Some(freq) => {
-                    // Recurring: check if there's an occurrence this month
                     let till = tx
                         .recurring_till
                         .as_deref()
@@ -76,14 +98,23 @@ fn month_expense_from_txs(all_txs: &[Transactions], month: u32, year: i32) -> f3
         .sum()
 }
 
+#[derive(Clone)]
+struct HomeData {
+    balance: f32,
+    month_income: f32,
+    month_expense: f32,
+    recent_txs: Vec<RecentTx>,
+    top_categories: Vec<CatSlice>,
+    goals: Vec<GoalRow>,
+    loans: Vec<LoanRow>,
+}
+
 #[component]
 pub fn Home() -> Element {
     let db = use_context::<DbConnection>();
-    let nav = use_navigator();
     let now = Local::now();
 
-    let mut balance = use_signal(|| 0.0f32);
-    let mut burn = use_signal(|| 0.0f32);
+    let mut data = use_signal(|| None::<HomeData>);
     let mut initialized = use_signal(|| false);
 
     {
@@ -96,6 +127,9 @@ pub fn Home() -> Element {
 
             let accts = acct_repo::get_all(&db).unwrap_or_default();
             let all_txs = tx_repo::get_all(&db).unwrap_or_default();
+            let categories = cat_repo::get_all(&db).unwrap_or_default();
+            let goals = goal_repo::get_all(&db).unwrap_or_default();
+            let loans = loan_repo::get_all(&db).unwrap_or_default();
 
             let base: f32 = accts.iter().map(|a| a.starting_balance).sum();
             let net: f32 = all_txs
@@ -106,19 +140,145 @@ pub fn Home() -> Element {
                     TransactionType::Transfer => 0.0,
                 })
                 .sum();
-            balance.set(base + net);
+            let balance = base + net;
 
-            let month_burn = month_expense_from_txs(&all_txs, now.month(), now.year());
-            burn.set(month_burn);
+            let month_income = month_sum_by_type(&all_txs, now.month(), now.year(), TransactionType::Income);
+            let month_expense = month_sum_by_type(&all_txs, now.month(), now.year(), TransactionType::Expense);
+
+            let cat_map: HashMap<i16, (String, String)> = categories
+                .iter()
+                .map(|c| (c.id as i16, (c.name.clone(), c.icon.clone())))
+                .collect();
+
+            let month_start = NaiveDate::from_ymd_opt(now.year(), now.month(), 1).unwrap();
+            let month_end = if now.month() == 12 {
+                NaiveDate::from_ymd_opt(now.year() + 1, 1, 1).unwrap()
+            } else {
+                NaiveDate::from_ymd_opt(now.year(), now.month() + 1, 1).unwrap()
+            };
+
+            let mut month_txs: Vec<&Transactions> = all_txs
+                .iter()
+                .filter(|tx| {
+                    tx.frequency.is_none()
+                        && tx.tx_date >= month_start
+                        && tx.tx_date < month_end
+                })
+                .collect();
+            month_txs.sort_by(|a, b| {
+                b.tx_date.cmp(&a.tx_date).then(b.tx_time.cmp(&a.tx_time))
+            });
+
+            let recent_txs: Vec<RecentTx> = month_txs
+                .iter()
+                .take(5)
+                .map(|tx| {
+                    let (_, icon) = cat_map
+                        .get(&tx.category)
+                        .cloned()
+                        .unwrap_or_default();
+                    let day = tx.tx_date.day();
+                    let suffix = match day {
+                        1 | 21 | 31 => "st",
+                        2 | 22 => "nd",
+                        3 | 23 => "rd",
+                        _ => "th",
+                    };
+                    RecentTx {
+                        id: tx.id,
+                        title: tx.title.clone(),
+                        amount: tx.amount,
+                        icon,
+                        is_income: tx.tx_type == TransactionType::Income,
+                        date_label: format!("{}{}", day, suffix),
+                    }
+                })
+                .collect();
+
+            let mut cat_spend: HashMap<i16, f32> = HashMap::new();
+            for tx in &month_txs {
+                if tx.tx_type == TransactionType::Expense {
+                    *cat_spend.entry(tx.category).or_default() += tx.amount;
+                }
+            }
+            let total_cat_spend: f32 = cat_spend.values().sum();
+            let mut sorted_cats: Vec<(i16, f32)> = cat_spend.into_iter().collect();
+            sorted_cats.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap_or(std::cmp::Ordering::Equal));
+            sorted_cats.truncate(PIE_COLORS.len());
+            let top_cats: Vec<CatSlice> = sorted_cats
+                .iter()
+                .enumerate()
+                .map(|(i, (cat_id, amount))| {
+                    let (name, icon) = cat_map
+                        .get(cat_id)
+                        .cloned()
+                        .unwrap_or(("Other".into(), String::new()));
+                    let pct = if total_cat_spend > 0.0 {
+                        amount / total_cat_spend * 100.0
+                    } else {
+                        0.0
+                    };
+                    CatSlice {
+                        name,
+                        icon,
+                        amount: *amount,
+                        pct,
+                        color: PIE_COLORS[i % PIE_COLORS.len()],
+                    }
+                })
+                .collect();
+
+            let goal_rows: Vec<GoalRow> = goals
+                .iter()
+                .map(|g| {
+                    let saved = tx_repo::sum_for_goal(&db, g.id).unwrap_or(0.0);
+                    let pct = if g.target > 0.0 {
+                        (saved / g.target * 100.0).min(100.0)
+                    } else {
+                        0.0
+                    };
+                    GoalRow { name: g.name.clone(), target: g.target, current: saved, pct }
+                })
+                .collect();
+
+            let loan_rows: Vec<LoanRow> = loans
+                .iter()
+                .map(|l| {
+                    let paid = tx_repo::sum_for_loan(&db, l.id).unwrap_or(0.0);
+                    let pct = if l.total_amount > 0.0 {
+                        (paid / l.total_amount * 100.0).min(100.0)
+                    } else {
+                        0.0
+                    };
+                    LoanRow {
+                        name: l.name.clone(),
+                        total: l.total_amount,
+                        paid,
+                        pct,
+                        is_lender: l.is_lender,
+                    }
+                })
+                .collect();
+
+            data.set(Some(HomeData {
+                balance,
+                month_income,
+                month_expense,
+                recent_txs,
+                top_categories: top_cats,
+                goals: goal_rows,
+                loans: loan_rows,
+            }));
         });
     }
 
-    let bal = *balance.read();
-    let bal_whole = bal.abs().trunc() as i64;
-    let bal_cents = ((bal.abs() - bal.abs().trunc()) * 100.0).round() as u32;
-    let bal_neg = bal < 0.0;
+    let d = data.read();
+    let home = d.as_ref();
 
-    let burn_val = *burn.read();
+    let bal = home.map(|h| h.balance).unwrap_or(0.0);
+    let month_income = home.map(|h| h.month_income).unwrap_or(0.0);
+    let month_expense = home.map(|h| h.month_expense).unwrap_or(0.0);
+    let month_label = month_name(now.month()).to_string();
 
     rsx! {
         div {
@@ -133,56 +293,41 @@ pub fn Home() -> Element {
                 }
             }
 
-            div {
-                class: "balance-hero",
-                p { class: "balance-label", "TOTAL BALANCE" }
-                div {
-                    class: "balance-display",
-                    if bal_neg { span { class: "balance-currency", "−$" } }
-                    else { span { class: "balance-currency", "$" } }
-                    span { class: "balance-whole", "{bal_whole}" }
-                    span { class: "balance-cents", ".{bal_cents:02}" }
-                }
-                div {
-                    class: "burn-pill",
-                    span { class: "burn-value", { format!("${:.2}", burn_val.abs()) } }
-                    span { class: "burn-sep" }
-                    span { class: "burn-tag", "MTH EXPENSE" }
+            BalanceHero {
+                bal,
+                month_income,
+                month_expense,
+                month_label: month_label.clone(),
+            }
+
+            if let Some(h) = home {
+                if !h.top_categories.is_empty() {
+                    SpendingChart {
+                        categories: h.top_categories.clone(),
+                        month_label: month_label.clone(),
+                    }
                 }
             }
 
-            div {
-                class: "action-grid",
-
-                button {
-                    class: "action-card action-card--primary",
-                    style: "animation-delay: 0ms",
-                    onclick: move |_| { nav.push(Route::AddTransaction); },
-                    div { class: "card-glyph icon-plus" }
-                    span { class: "card-label", "ADD" }
-                }
-                button {
-                    class: "action-card",
-                    style: "animation-delay: 60ms",
-                    onclick: move |_| { nav.push(Route::AddTransaction); },
-                    div { class: "card-glyph icon-arrow-right-left" }
-                    span { class: "card-label", "TRANSFER" }
-                }
-                button {
-                    class: "action-card",
-                    style: "animation-delay: 120ms",
-                    onclick: move |_| { nav.push(Route::Transactions); },
-                    div { class: "card-glyph icon-list" }
-                    span { class: "card-label", "LEDGER" }
-                }
-                button {
-                    class: "action-card",
-                    style: "animation-delay: 180ms",
-                    onclick: move |_| { nav.push(Route::Settings); },
-                    div { class: "card-glyph icon-settings" }
-                    span { class: "card-label", "SETTINGS" }
+            if let Some(h) = home {
+                if !h.recent_txs.is_empty() {
+                    RecentTransactions { txs: h.recent_txs.clone() }
                 }
             }
+
+            if let Some(h) = home {
+                if !h.goals.is_empty() {
+                    GoalsSection { goals: h.goals.clone() }
+                }
+            }
+
+            if let Some(h) = home {
+                if !h.loans.is_empty() {
+                    LoansSection { loans: h.loans.clone() }
+                }
+            }
+
+            div { style: "height: 24px" }
         }
     }
 }
