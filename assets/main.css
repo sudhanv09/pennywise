@@ -100,6 +100,44 @@ a { color: inherit; text-decoration: none; }
 
 #appdock ul li a.active::after { width: 20px; }
 
+/* FAB spacer — holds the gap in the nav row, no visual content */
+#appdock ul li.dock-fab-item {
+    width: 72px;
+    flex-shrink: 0;
+    pointer-events: none;
+}
+
+/* FAB floats above the dock via absolute positioning */
+#appdock ul li.dock-fab-item a.dock-fab {
+    position: absolute;
+    bottom: 20px;          /* protrudes 20+56-68 = 8px above dock top */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 56px;
+    height: 56px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 -2px 0 var(--bg) inset, 0 6px 20px rgba(240, 180, 41, 0.45);
+    pointer-events: auto;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+#appdock ul li.dock-fab-item a.dock-fab::after { display: none; }
+
+#appdock ul li.dock-fab-item a.dock-fab i {
+    font-size: 26px;
+    color: #000;
+}
+
+#appdock ul li.dock-fab-item a.dock-fab:hover {
+    transform: translateX(-50%) scale(1.1);
+    box-shadow: 0 -2px 0 var(--bg) inset, 0 8px 24px rgba(240, 180, 41, 0.65);
+}
+
 @keyframes fadeUp {
     from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
